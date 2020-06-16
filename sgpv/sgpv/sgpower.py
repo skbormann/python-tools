@@ -1,13 +1,45 @@
 # Add type hints for parameters
-def sgpower(*,true, null_lo, null_hi, std_err=1, interval_type, interval_level, bonus=False):
-    """ sgpower - Compute power/type I error for Second-Generation p-values approach """
+def sgpower(*,true, null_lo, null_hi, std_err=1, interval_type:str, interval_level, bonus=False):
+    """
+    sgpower - Compute power/type I error for Second-Generation p-values approach
+    For now only single input values are fully supported
+    vector inputs are still error-prone
+
+    Parameters
+    ----------
+    * : TYPE
+        DESCRIPTION.
+    true : TYPE
+        DESCRIPTION.
+    null_lo : TYPE
+        DESCRIPTION.
+    null_hi : TYPE
+        DESCRIPTION.
+    std_err : TYPE, optional
+        DESCRIPTION. The default is 1.
+    interval_type : str
+        DESCRIPTION.
+    interval_level : TYPE
+        DESCRIPTION.
+    bonus : TYPE, optional
+        DESCRIPTION. The default is False.
+
+    Returns
+    -------
+    None.
+
+    """
     import numpy as np
     from scipy import integrate
     from scipy.stats import norm
-    
+    #from sgpv import stop
+    import stop
     
     #Need to learn error handling
     #if !intervaltype in ['confidence', 'likelihood'] #stop("Parameter `intervaltype` must be one of the following: \n  * confidence \n  * likelihood \n  (credible not currently supported for power calculations)")
+    if  interval_type not in ['confidence', 'likelihood']: 
+        stop("Parameter `intervaltype` must be one of the following: \
+             \n   'confidence' \n  'likelihood' \n  \ (credible not currently supported for power calculations)")
 
     if interval_type == 'confidence': 
         Z = norm.ppf(1-interval_level/2)
@@ -37,8 +69,11 @@ def sgpower(*,true, null_lo, null_hi, std_err=1, interval_type, interval_level, 
   
   
     ## check
+    #Need to find out which exception to raise to emulate behaviour of R's warning()-function
+    #Need to find out how the index
     #if (any(round(power0+powerinc+power1,7) != 1)) warning(paste0('error: power0+powerinc+power1 != 1 for indices ', paste(which(round(power0+powerinc+power1,7) != 1), collapse=', ')))
-  
+    if (round(power0+powerinc+power1,7) != 1):
+        print('error: power0+powerinc+power1 != 1 for indices ', round(power0+powerinc+power1,7) != 1)
     ## bonus: type I error summaries
     pow0 = lambda x: norm.cdf(null_lo/std_err - x/std_err - Z) + norm.cdf(-null_hi/std_err + x/std_err - Z)
   
@@ -56,6 +91,30 @@ def sgpower(*,true, null_lo, null_hi, std_err=1, interval_type, interval_level, 
     ## (TBD)
     #Displaying of bonus statistics not correct yet
    # print('poweralt' = power0, 'powerinc' = powerinc, 'powernull' = power1, 'type I error summaries' = typeI)
-    print('poweralt =', round(power0,7), 'powerinc =', round(powerinc,7), 'powernull = ', round(power1,7), '\n type I error summaries: \n', typeI)
+    print('poweralt =', round(power0,7), 'powerinc =', round(powerinc,7), \
+          'powernull = ', round(power1,7), '\n type I error summaries: \n', typeI)
     #return('poweralt' : power0, 'powerinc' : powerinc, 'powernull' : power1, 'typeI' : typeI)
-    return(power0, powerinc, power1, typeI)
+    return {'poweralt' : power0, 'powerinc' : powerinc, 'powernull' : power1, 'typeI' : typeI}
+
+# def stop(text):
+#     """
+#     Emulates the behavior of R's stop-function
+#     -> not test outside of IPython-console -> color only working when runnning
+#     without colorama
+
+#     Parameters
+#     ----------
+#     text : TYPE
+#         DESCRIPTION.
+
+#     Returns
+#     -------
+#     None.
+
+#     """
+#     from colorama import init
+#     from termcolor import colored
+#     import sys
+#     init()
+#     print(colored(text,'red'))
+#     sys.exit(1)

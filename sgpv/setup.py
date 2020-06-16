@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="sgpv-YOUR-USERNAME-HERE", # Replace with your own username
+    name="sgpv-skbormann", # Replace with your own username
     version="0.0.1",
     author="Sven-Kristjan Bormann",
     author_email="sven-kristjan@gmx.de",
