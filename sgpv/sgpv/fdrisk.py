@@ -1,18 +1,20 @@
  #Need to make available somehow the sgpower function
-def fdrisk(*,sgpval=0, null_lo, null_hi, std_err, \
-                   interval_type, interval_level, pi0 = 0.5, \
+def fdrisk(*,sgpval: int =0, null_lo, null_hi, std_err: float, \
+                   interval_type: str, interval_level, pi0: float = 0.5, \
                    null_weights, null_space, alt_weights, alt_space):
     """
-    False Discovery Risk for Second-Generation p-values
+    False Discovery Risk for Second-Generation p-values.
     
     To-Do: Suppress output from sgpower -> at the moment everything is printed 
             in the console -> Python behaves different from R here
-
+            Add user-defined expections for better error handling:
+                see https://docs.python.org/3/tutorial/errors.html
+           Add namedtuple to get similar returns as for sgpvalue and sgpower?     
     Parameters
     ----------
     * : TYPE
         DESCRIPTION.
-    sgpval : TYPE, optional
+    sgpval : int, optional
         DESCRIPTION. The default is 0.
     null_lo : TYPE
         DESCRIPTION.
@@ -106,7 +108,7 @@ def fdrisk(*,sgpval=0, null_lo, null_hi, std_err, \
 
                 # truncate bounds to edge of null if null.spcae falls outside
                 # indifference zone
-                if max(null_space) > null_hi or min(null_space) < null_lo:
+                if (max(null_space) > null_hi) or (min(null_space) < null_lo):
                     print(colored(
                         'null space must be inside originally specified \
                             null hypothesis; at least one null space bound has been truncated', 'red'))

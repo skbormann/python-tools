@@ -1,7 +1,7 @@
 # Add type hints for parameters
-def sgpower(*,true, null_lo, null_hi, std_err=1, interval_type:str, interval_level, bonus=False):
+def sgpower(*,true: float, null_lo, null_hi, std_err: float =1, interval_type:str, interval_level, bonus=False):
     """
-    sgpower - Compute power/type I error for Second-Generation p-values approach
+    Compute power/type I error for Second-Generation p-values approach.
     For now only single input values are fully supported
     vector inputs are still error-prone
 
@@ -9,13 +9,13 @@ def sgpower(*,true, null_lo, null_hi, std_err=1, interval_type:str, interval_lev
     ----------
     * : TYPE
         DESCRIPTION.
-    true : TYPE
+    true : float
         DESCRIPTION.
     null_lo : TYPE
         DESCRIPTION.
     null_hi : TYPE
         DESCRIPTION.
-    std_err : TYPE, optional
+    std_err : float, optional
         DESCRIPTION. The default is 1.
     interval_type : str
         DESCRIPTION.
@@ -32,11 +32,11 @@ def sgpower(*,true, null_lo, null_hi, std_err=1, interval_type:str, interval_lev
     import numpy as np
     from scipy import integrate
     from scipy.stats import norm
+    from collections import namedtuple # for better naming of the output
     #from sgpv import stop
     import stop
     
     #Need to learn error handling
-    #if !intervaltype in ['confidence', 'likelihood'] #stop("Parameter `intervaltype` must be one of the following: \n  * confidence \n  * likelihood \n  (credible not currently supported for power calculations)")
     if  interval_type not in ['confidence', 'likelihood']: 
         stop("Parameter `intervaltype` must be one of the following: \
              \n   'confidence' \n  'likelihood' \n  \ (credible not currently supported for power calculations)")
@@ -85,16 +85,22 @@ def sgpower(*,true, null_lo, null_hi, std_err=1, interval_type:str, interval_lev
     if null_lo<=0 & 0<=null_hi:
        # print('at 0'=pow0(0), 'min'=minI, 'max'=maxI, 'mean'=avgI)
         #typeI = (pow0(0), minI, maxI, avgI)
-        typeI = ('at 0 =', round(pow0(0),7), 'min =', round(minI,7), 'max =',round(maxI,7), 'mean =', round(avgI,7))
-  
+        #Not quite the output I want
+        #typeI = ('at 0 =', round(pow0(0),7), 'min =', round(minI,7), 'max =',round(maxI,7), 'mean =', round(avgI,7))
+        TypeI = namedtuple('typeI','at0,min,max,mean')
+        #typeI =[round(pow0(0),7),round(minI,7), round(avgI,7)]
+        typeI =TypeI(round(pow0(0),7),round(minI,7),round(maxI,7), round(avgI,7))
     ## more bonus: P(inc | null) (basically analogous to type II error but for confirmation)
     ## (TBD)
     #Displaying of bonus statistics not correct yet
    # print('poweralt' = power0, 'powerinc' = powerinc, 'powernull' = power1, 'type I error summaries' = typeI)
     print('poweralt =', round(power0,7), 'powerinc =', round(powerinc,7), \
-          'powernull = ', round(power1,7), '\n type I error summaries: \n', typeI)
+          'powernull = ', round(power1,7), '\n type I error summaries: \n', 'at 0 =', round(pow0(0),7), 'min =', round(minI,7), 'max =',round(maxI,7), 'mean =', round(avgI,7))
     #return('poweralt' : power0, 'powerinc' : powerinc, 'powernull' : power1, 'typeI' : typeI)
-    return {'poweralt' : power0, 'powerinc' : powerinc, 'powernull' : power1, 'typeI' : typeI}
+    sgpow = namedtuple('sgpower',['poweralt', 'powerinc','powernull','typeI'])
+    res = sgpow(power0,powerinc,power1,typeI)
+    return res
+    # return {'poweralt' : power0, 'powerinc' : powerinc, 'powernull' : power1, 'typeI error summaries' : typeI}
 
 # def stop(text):
 #     """
