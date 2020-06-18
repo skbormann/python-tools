@@ -4,6 +4,8 @@ def sgpower(*,true: float, null_lo, null_hi, std_err: float =1, interval_type:st
     Compute power/type I error for Second-Generation p-values approach.
     For now only single input values are fully supported
     vector inputs are still error-prone
+    Add user-defined expections for better error handling:
+        see https://docs.python.org/3/tutorial/errors.html
 
     Parameters
     ----------
@@ -101,26 +103,3 @@ def sgpower(*,true: float, null_lo, null_hi, std_err: float =1, interval_type:st
     res = sgpow(power0,powerinc,power1,typeI)
     return res
     # return {'poweralt' : power0, 'powerinc' : powerinc, 'powernull' : power1, 'typeI error summaries' : typeI}
-
-# def stop(text):
-#     """
-#     Emulates the behavior of R's stop-function
-#     -> not test outside of IPython-console -> color only working when runnning
-#     without colorama
-
-#     Parameters
-#     ----------
-#     text : TYPE
-#         DESCRIPTION.
-
-#     Returns
-#     -------
-#     None.
-
-#     """
-#     from colorama import init
-#     from termcolor import colored
-#     import sys
-#     init()
-#     print(colored(text,'red'))
-#     sys.exit(1)

@@ -76,12 +76,12 @@ def fdrisk(*,sgpval: int =0, null_lo, null_hi, std_err: float, \
                             null_hi=null_hi,
                             std_err=std_err,
                             interval_type=interval_type,
-                            interval_level=interval_level)['poweralt']
+                            interval_level=interval_level).poweralt
     if sgpval == 1:
         power = lambda x: sgpower.sgpower(true=x, null_lo=null_lo, null_hi=null_hi, 
                                   std_err=std_err, 
                                   interval_type=interval_type, 
-                                  interval_level=interval_level)['powernull']
+                                  interval_level=interval_level).powernull
     if null_lo == null_hi:
         if any(null_lo != null_space):
             print(colored(

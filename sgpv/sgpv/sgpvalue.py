@@ -2,19 +2,22 @@ def sgpvalue(*, null_lo, null_hi, est_lo, est_hi, inf_correction=1e-5, warnings=
     """
     Second-Generation p-values and delta-gaps.
     Output is still not pretty-> need to remove numpy type information
-
+     Add user-defined expections for better error handling:
+        see https://docs.python.org/3/tutorial/errors.html
     Parameters
     ----------
     * : TYPE
         DESCRIPTION.
-    null_lo : TYPE
+    null_lo : array_like
         DESCRIPTION.
-    null_hi : TYPE
+    null_hi : array_like
         DESCRIPTION.
-    est_lo : TYPE
-        DESCRIPTION.
-    est_hi : TYPE
-        DESCRIPTION.
+    est_lo : array_like
+        lower bounds of interval estimates. Values may be finite or -Inf or Inf. 
+        Must be of same length as est_hi.
+    est_hi : array_like
+        upper bounds of interval estimates. Values may be finite or -Inf or Inf. 
+        Must be of same length as est_lo.
     infcorrection : TYPE, optional
         DESCRIPTION. The default is 1e-5.
     warnings : TYPE, optional
@@ -22,10 +25,20 @@ def sgpvalue(*, null_lo, null_hi, est_lo, est_hi, inf_correction=1e-5, warnings=
 
     Returns
     -------
-    TYPE
-        DESCRIPTION.
-    deltagap : TYPE
-        DESCRIPTION.
+    pdelta : array
+        second-generation p-values.
+    deltagap : array
+        the delta gaps, Reported as None when the corresponding 
+        second-generation p-value is not zero.
+    
+
+    Examples
+    --------
+    import math
+    lb = (math.log(1.05), math.log(1.3), math.log(0.97))
+    ub = (math.log(1.8), math.log(1.8), math.log(1.02))
+    sgpv = sgpvalue(est_lo = lb, est_hi = ub, null_lo = math.log(1/1.1), null_hi = math.log(1.1))
+    sgpvalue()
 
     """
 
@@ -81,38 +94,38 @@ def sgpvalue(*, null_lo, null_hi, est_lo, est_hi, inf_correction=1e-5, warnings=
     pdelta = overlap / bottom
 
     # Zero-length & Infinite-length intervals -> to be added once I know how to check for these
+    # not working correctly yet
     ## Overwrite NA and NaN due to bottom = Inf
-    pdelta[overlap==0] = 0
+    # pdelta[overlap==0] = 0
+    #np.where((overlap==0), 0, pdelta)
 
-    ## Overlap finite & non-zero but bottom = Inf
-    pdelta[overlap!=0 & np.isfinite(overlap) & np.isinf(bottom)] = inf_correction
-    # print(type(pdelta), pdelta.dtype,
-    #       type(overlap), overlap.dtype,
-    #       type(bottom), bottom.dtype)
-    # print('overlap :',overlap, 'bottom :', bottom, 'pdelta :', pdelta)
-    # pdelta = np.where((np.any(overlap!=0) and np.isfinite(overlap) and np.isinf(bottom)),inf_correction,pdelta) 
+    # ## Overlap finite & non-zero but bottom = Inf
+    #pdelta[overlap!=0 & np.isfinite(overlap) & np.isinf(bottom)] = inf_correction
 
-    ## Interval estimate is a point (overlap=zero) but can be in null or equal null pt
-    pdelta[(est_len==0)  & (null_len>=0 ) & (est_lo>=null_lo) & (est_hi<=null_hi)] = 1
+    # # print('overlap :',overlap, 'bottom :', bottom, 'pdelta :', pdelta)
+    # # pdelta = np.where((np.any(overlap!=0) and np.isfinite(overlap) and np.isinf(bottom)),inf_correction,pdelta) 
 
-    ## Null interval is a point (overlap=zero) but is in interval estimate
-    pdelta[(est_len>0)  & (null_len==0)  & (est_lo<=null_lo)  & (est_hi>=null_hi)] = 1/2
+    # ## Interval estimate is a point (overlap=zero) but can be in null or equal null pt
+    # pdelta[(est_len==0)  & (null_len>=0 ) & (est_lo>=null_lo) & (est_hi<=null_hi)] = 1
 
-    ## One-sided intervals with overlap; overlap == Inf & bottom==Inf
-    pdelta[np.isinf(overlap) & np.isinf(bottom) & ((est_hi<=null_hi) | (est_lo>=null_lo))] = 1
-    pdelta[np.isinf(overlap) & np.isinf(bottom) & ((est_hi>null_hi) | (est_lo<null_lo))] = 1-inf_correction
+    # ## Null interval is a point (overlap=zero) but is in interval estimate
+    # pdelta[(est_len>0)  & (null_len==0)  & (est_lo<=null_lo)  & (est_hi>=null_hi)] = 1/2
 
-    ## Interval estimate is entire real line and null interval is NOT entire real line
-    pdelta[np.isneginf(est_lo)  & np.isposinf(est_hi)] = 1/2
+    # ## One-sided intervals with overlap; overlap == Inf & bottom==Inf
+    # pdelta[np.isinf(overlap) & np.isinf(bottom) & ((est_hi<=null_hi) | (est_lo>=null_lo))] = 1
+    # pdelta[np.isinf(overlap) & np.isinf(bottom) & ((est_hi>null_hi) | (est_lo<null_lo))] = 1-inf_correction
 
-    ## Null interval is entire real line
-    pdelta[np.isneginf(null_lo)  & np.isposinf(null_hi)] = None
+    # ## Interval estimate is entire real line and null interval is NOT entire real line
+    # pdelta[np.isneginf(est_lo)  & np.isposinf(est_hi)] = 1/2
 
-    if (np.any(null_lo==np.NINF) & np.any(null_hi==np.inf) and warnings): 
-        warning('at least one null interval is entire real line') 
+    # ## Null interval is entire real line
+    # pdelta[np.isneginf(null_lo)  & np.isposinf(null_hi)] = None
 
-    ## Return NA for nonsense intervals
-    pdelta[(est_lo>est_hi) | (null_lo>null_hi)] = None
+    # if (np.any(null_lo==np.NINF) & np.any(null_hi==np.inf) and warnings): 
+    #     warning('at least one null interval is entire real line') 
+
+    # ## Return NA for nonsense intervals -> not working correctly yet
+    # pdelta[(est_lo>est_hi) | (null_lo>null_hi)] = None
 
     if (np.any(est_lo>est_hi) or np.any(null_lo>null_hi)) and warnings:
         warning('Some interval limits likely reversed')
