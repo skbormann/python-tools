@@ -13,7 +13,7 @@ def stop(text):
 
     Parameters
     ----------
-    text : TYPE
+    text : str
         DESCRIPTION.
 
     Returns
@@ -25,6 +25,23 @@ def stop(text):
     from termcolor import colored
     import sys
     init()
-    print(colored(text,'red'))
+    print(colored(text, 'red'))
     sys.exit(1)
+ 
+def warning(text):
+    """
+    Emulate the behavior of the R-function with the same name
+    
+    Parameters
+    ----------
+    text : str
+        DESCRIPTION.
+    
+    Returns
+    -------
+    None.
+    
+    """
+    from termcolor import colored
+    print(colored(text, 'red'))
     

@@ -1,3 +1,5 @@
+"""This module implements the calculation"""
+
 def sgpvalue(*, null_lo, null_hi, est_lo, est_hi, inf_correction=1e-5, warnings=True):
     """
     Second-Generation p-values and delta-gaps.
@@ -13,10 +15,10 @@ def sgpvalue(*, null_lo, null_hi, est_lo, est_hi, inf_correction=1e-5, warnings=
     null_hi : array_like
         DESCRIPTION.
     est_lo : array_like
-        lower bounds of interval estimates. Values may be finite or -Inf or Inf. 
+        lower bounds of interval estimates. Values may be finite or -Inf or Inf.
         Must be of same length as est_hi.
     est_hi : array_like
-        upper bounds of interval estimates. Values may be finite or -Inf or Inf. 
+        upper bounds of interval estimates. Values may be finite or -Inf or Inf.
         Must be of same length as est_lo.
     infcorrection : TYPE, optional
         DESCRIPTION. The default is 1e-5.
@@ -28,40 +30,39 @@ def sgpvalue(*, null_lo, null_hi, est_lo, est_hi, inf_correction=1e-5, warnings=
     pdelta : array
         second-generation p-values.
     deltagap : array
-        the delta gaps, Reported as None when the corresponding 
+        the delta gaps, Reported as None when the corresponding
         second-generation p-value is not zero.
-    
+
 
     Examples
     --------
     import math
     lb = (math.log(1.05), math.log(1.3), math.log(0.97))
     ub = (math.log(1.8), math.log(1.8), math.log(1.02))
-    sgpv = sgpvalue(est_lo = lb, est_hi = ub, null_lo = math.log(1/1.1), null_hi = math.log(1.1))
-    sgpvalue()
+    sgpvalue(est_lo = lb, est_hi = ub, null_lo = math.log(1/1.1), null_hi = math.log(1.1))
+
 
     """
 
     #Convert inputs into np.array to emulate R behaviour
     import numpy as np
-    import stop
+    from stop import stop
     from termcolor import colored
     from collections import namedtuple
     #Not all inputs are yet handled correctly -> works only now if null_lo and null_hi
     #are scalars and est_hi and est_lo are vectors -> does not work if est_hi and est_lo are scalars
     if len([null_hi]) != len([null_lo]):
         stop("null_lo and null_hi are of different length")
-        
-    if (len(est_lo) != len(est_hi)):
+
+    if len(est_lo) != len(est_hi):
         stop('est_lo and est_hi of different lengths')
 
     #
     null_lo = np.asarray(null_lo, dtype=np.float64)
     null_hi = np.asarray(null_hi, dtype=np.float64)
     est_lo = np.asarray(est_lo, dtype=np.float64)
-    est_hi = np.asarray(est_hi ,dtype=np.float64)
-    
-    #if len(null_lo) == 1:
+    est_hi = np.asarray(est_hi, dtype=np.float64)
+
     if null_lo.size == 1:
         null_lo = np.repeat(null_lo, len(est_lo))
         null_hi = np.repeat(null_hi, len(est_hi))
@@ -70,21 +71,22 @@ def sgpvalue(*, null_lo, null_hi, est_lo, est_hi, inf_correction=1e-5, warnings=
     est_len = np.array(est_hi) - np.array(est_lo)
     null_len = np.array(null_hi) - np.array(null_lo)
 
-    # Warnings -> to be added once I know how to check for these
-    na_any = (np.any(est_lo is None) or np.any(est_hi is None) or 
+    # Warnings -> to be added once I know how to check for these 
+    # -> might not be 100% correct yet
+    na_any = (np.any(est_lo is None) or np.any(est_hi is None) or
               np.any(null_lo is None) or np.any(null_hi is None))
 
-    if (na_any==True) and warnings:
+    if (na_any is True) and warnings:
         print(colored('At least one input is NA', 'red'))
 
-    if (na_any==False) and np.any(est_len<0) and np.any(null_len<0) and warnings :
+    if (na_any is False) and np.any(est_len < 0) and np.any(null_len < 0) and warnings:
         warning('At least one interval length is negative')
 
-    if (na_any==False) and np.any(np.isinf(abs(est_len)+abs(null_len))) and warnings :
-        warning('At least one interval has infinite length') 
+    if (na_any is False) and np.any(np.isinf(abs(est_len) + abs(null_len))) and warnings:
+        warning('At least one interval has infinite length')
 
-    if (na_any==False) and (np.any(est_len==0) or np.any(null_len==0)) and warnings :
-        warning('At least one interval has zero length') 
+    if (na_any is False) and (np.any(est_len == 0) or np.any(null_len == 0)) and warnings:
+        warning('At least one interval has zero length')
     # SGPV computation
     overlap = np.minimum(est_hi, null_hi) - np.maximum(est_lo, null_lo)
     overlap = np.maximum(overlap, 0)
@@ -97,37 +99,35 @@ def sgpvalue(*, null_lo, null_hi, est_lo, est_hi, inf_correction=1e-5, warnings=
     # not working correctly yet
     ## Overwrite NA and NaN due to bottom = Inf
     # pdelta[overlap==0] = 0
-    #np.where((overlap==0), 0, pdelta)
+    np.where((overlap == 0), 0, pdelta)
 
-    # ## Overlap finite & non-zero but bottom = Inf
-    #pdelta[overlap!=0 & np.isfinite(overlap) & np.isinf(bottom)] = inf_correction
+    # Overlap finite & non-zero but bottom = Inf
+    np.where(overlap != 0 & np.isfinite(overlap) & np.isinf(bottom), inf_correction, pdelta)
+    
+    # Interval estimate is a point (overlap=zero) but can be in null or equal null pt
+    pdelta[(est_len == 0)  & (null_len >= 0) & (est_lo >= null_lo) & (est_hi <= null_hi)] = 1
 
-    # # print('overlap :',overlap, 'bottom :', bottom, 'pdelta :', pdelta)
-    # # pdelta = np.where((np.any(overlap!=0) and np.isfinite(overlap) and np.isinf(bottom)),inf_correction,pdelta) 
+    # Null interval is a point (overlap=zero) but is in interval estimate
+    pdelta[(est_len > 0)  & (null_len == 0)  & (est_lo <= null_lo)  & (est_hi >= null_hi)] = 1/2
 
-    # ## Interval estimate is a point (overlap=zero) but can be in null or equal null pt
-    # pdelta[(est_len==0)  & (null_len>=0 ) & (est_lo>=null_lo) & (est_hi<=null_hi)] = 1
-
-    # ## Null interval is a point (overlap=zero) but is in interval estimate
-    # pdelta[(est_len>0)  & (null_len==0)  & (est_lo<=null_lo)  & (est_hi>=null_hi)] = 1/2
-
-    # ## One-sided intervals with overlap; overlap == Inf & bottom==Inf
-    # pdelta[np.isinf(overlap) & np.isinf(bottom) & ((est_hi<=null_hi) | (est_lo>=null_lo))] = 1
-    # pdelta[np.isinf(overlap) & np.isinf(bottom) & ((est_hi>null_hi) | (est_lo<null_lo))] = 1-inf_correction
+    # One-sided intervals with overlap; overlap == Inf & bottom==Inf
+    pdelta[np.isinf(overlap) & np.isinf(bottom) & ((est_hi <= null_hi) | (est_lo >= null_lo))] = 1
+    pdelta[np.isinf(overlap) & np.isinf(bottom) &
+           ((est_hi > null_hi) | (est_lo < null_lo))] = 1-inf_correction
 
     # ## Interval estimate is entire real line and null interval is NOT entire real line
-    # pdelta[np.isneginf(est_lo)  & np.isposinf(est_hi)] = 1/2
+    pdelta[np.isneginf(est_lo)  & np.isposinf(est_hi)] = 1/2
 
     # ## Null interval is entire real line
-    # pdelta[np.isneginf(null_lo)  & np.isposinf(null_hi)] = None
+    pdelta[np.isneginf(null_lo)  & np.isposinf(null_hi)] = None
 
-    # if (np.any(null_lo==np.NINF) & np.any(null_hi==np.inf) and warnings): 
-    #     warning('at least one null interval is entire real line') 
+    if np.any(null_lo == np.NINF) & np.any(null_hi == np.inf) and warnings:
+        warning('at least one null interval is entire real line')
 
     # ## Return NA for nonsense intervals -> not working correctly yet
-    # pdelta[(est_lo>est_hi) | (null_lo>null_hi)] = None
+    pdelta[(est_lo > est_hi) | (null_lo > null_hi)] = None
 
-    if (np.any(est_lo>est_hi) or np.any(null_lo>null_hi)) and warnings:
+    if (np.any(est_lo > est_hi) or np.any(null_lo > null_hi)) and warnings:
         warning('Some interval limits likely reversed')
     # Calculate delta gap
     deltagap = np.repeat(None, len(pdelta))
@@ -148,8 +148,8 @@ def sgpvalue(*, null_lo, null_hi, est_lo, est_hi, inf_correction=1e-5, warnings=
 
     #deltagap[! is.None(pdelta) & (pdelta == 0)] = dg[! is.na(pdelta) & (pdelta == 0)]
     deltagap[pdelta is not None and (pdelta == 0)] = dg[pdelta is not None and (pdelta == 0)]
-    sgpv=namedtuple('sgpv','pdelta, deltagap')
-    res=sgpv(pdelta,deltagap)
+    sgpv = namedtuple('sgpv', 'pdelta, deltagap')
+    res = sgpv(pdelta, deltagap)
     return res
     #return {'pdelta':pdelta, 'deltagap':deltagap}
 
@@ -159,7 +159,7 @@ def warning(text):
 
     Parameters
     ----------
-    text : TYPE
+    text : str
         DESCRIPTION.
 
     Returns
@@ -168,4 +168,4 @@ def warning(text):
 
     """
     from termcolor import colored
-    print(colored(text,'red'))
+    print(colored(text, 'red'))
