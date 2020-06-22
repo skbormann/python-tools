@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="sgpv-skbormann", # Replace with your own username
-    version="0.0.1",
+    version="1.0.0",
     author="Sven-Kristjan Bormann",
     author_email="sven-kristjan@gmx.de",
     description="Tools to calculate SGPVs",
@@ -18,5 +18,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
 )
