@@ -6,9 +6,9 @@ There is a translation of the R-library into Stata with additional features by t
 The Stata version of this module can be found here https://github.com/skbormann/stata-tools/tree/master/sgpv
 
 This module contains the following functions:
-            sgpvalue   - calculate the SGPVs
-            sgpower    - power functions for the SGPVs
-            fdrisk    - false confirmation/discovery risks for the SGPVs
-            plotsgpv   - plot the SGPVs
+            sgpv.value   - calculate the SGPVs
+            sgpv.power   - power functions for the SGPVs
+            sgpv.risk    - false confirmation/discovery risks for the SGPVs
+            sgpv.plot    - plot the SGPVs
 
 """

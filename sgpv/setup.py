@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="sgpv-skbormann",  # Replace with your own username
+    name="sgpv",
     version="1.0.0",
     author="Sven-Kristjan Bormann",
     author_email="sven-kristjan@gmx.de",
@@ -12,8 +12,9 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/skbormann/python-tools/sgpv",
-    keywords='"second generation p-values" sgpv "false discovery risk" ',
+    keywords='"second generation p-values" sgpv "false discovery risk" power-function',
     packages=setuptools.find_packages(),
+    include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

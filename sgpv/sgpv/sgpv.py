@@ -1,22 +1,39 @@
 # -*- coding: utf-8 -*-
 """
+Author: Sven-Kristjan Bormann
 This module implements the calculation of Second Generation P-Values and
 their associated diagnostics.
 
 This module contains the following functions:
+
             value    - calculate the SGPVs
+
             power    - power functions for the SGPVs
+
             risk     - false confirmation/discovery risks for the SGPVs
+
             plot     - plot the SGPVs
+
+The sgpv-module is a translation of the same named R-library of the same name.
+The original R-library can be found here https://github.com/weltybiostat/sgpv
+
+References:
+
+Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018). Second-generation p-values: Improved rigor, reproducibility, & transparency in statistical analyses. PLoS ONE 13(3): e0188299.
+https://doi.org/10.1371/journal.pone.0188299
+
+
+Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction to Second-generation p-values. The American Statistician. In press.
+https://doi.org/10.1080/00031305.2018.1537893
+
 """
 
 
 def value(*, null_lo, null_hi, est_lo, est_hi, inf_correction: float = 1e-5,
              warnings: bool = True):
-    """
-    Second-Generation p-values and delta-gaps.
+    """Second-Generation p-values and delta-gaps.
 
-    #TODO: Output is still not pretty-> need to remove numpy type information
+    #TODO: Output is still not pretty -> need to remove numpy type information
 
     Parameters
     ----------
@@ -32,7 +49,7 @@ def value(*, null_lo, null_hi, est_lo, est_hi, inf_correction: float = 1e-5,
     est_hi : array_like
         Upper bounds of interval estimates. Values may be finite or -Inf or Inf.
         Must be of same length as est_lo.
-    infcorrection : TYPE, optional
+    infcorrection : float, optional
         A small number to denote a positive but infinitesimally small SGPV.
         Default is 1e-5. SGPVs that are infinitesimally close to 1 are assigned 1-infcorrection.
         This option can only be invoked when one of the intervals has infinite length.
@@ -56,28 +73,28 @@ def value(*, null_lo, null_hi, est_lo, est_hi, inf_correction: float = 1e-5,
 
 
     Examples
-    # TODO : add references to original R-code and further comments
     --------
-    # Simple example for three estimated log odds ratios but the same null interval
+    Simple example for three estimated log odds ratios but the same null interval
 
     >>> import numpy as np
     >>> import sgpv
     >>> lb = (np.log(1.05), np.log(1.3), np.log(0.97))
     >>> ub = (np.log(1.8), np.log(1.8), np.log(1.02))
     >>> sgpv.value(est_lo = lb, est_hi = ub,
-                 null_lo = np.log(1/1.1), null_hi = np.log(1.1))
+    ...             null_lo = np.log(1/1.1), null_hi = np.log(1.1))
     sgpv(pdelta=array([0.1220227, 0.        , 1.        ]),
-         deltagap=array([None, 1.7527413, None], dtype=object))
+    ...     deltagap=array([None, 1.7527413, None], dtype=object))
     >>> sgpv.value(est_lo = np.log(1.3), est_hi = np.inf,
-                 null_lo = np.NINF, null_hi = np.log(1.1))
+    ...             null_lo = np.NINF, null_hi = np.log(1.1))
     At least one interval has infinite length
     sgpv(pdelta=array([0.]), deltagap=array([0.1670541], dtype=object))
     >>> sgpv.value(est_lo = np.log(1.05), est_hi = np.inf,
-                 null_lo = np.NINF, null_hi = np.log(1.1))
+    ...             null_lo = np.NINF, null_hi = np.log(1.1))
     At least one interval has infinite length
     sgpv(pdelta=array([0.]), deltagap=array([-0.04652], dtype=object))
 
-    # Example t-test with simulated data
+    Example t-test with simulated data
+
     >>> from scipy.stats import ttest_ind
     >>> from scipy.stats import norm
     >>> from scipy.stats import t
@@ -87,10 +104,12 @@ def value(*, null_lo, null_hi, est_lo, est_hi, inf_correction: float = 1e-5,
     >>> se = (x1-x2).std()/np.sqrt(15)
     >>> ci1 = (x1.mean()-x2.mean()) - se*t.ppf(df=13, q=0.975)
     >>> ci2 = (x1.mean()-x2.mean()) + se*t.ppf(df=13 ,q=0.975)
-    >>> sgpv.value(est_lo = ci1, est_hi = ci2, null_lo = -1, null_hi = 1)
+    >>> sgpv.value(est_lo = ci1, est_hi = ci2,
+    ...               null_lo = -1, null_hi = 1)
     sgpv(pdelta=array([0.]), deltagap=array([0.3000322], dtype=object))
 
-    # Simulated two-group dichotomous data for different parameters
+    Simulated two-group dichotomous data for different parameters
+
     >>> from scipy.stats import binom
     >>> from statsmodels.stats.proportion import proportions_ztest
     >>> np.random.seed(1492)
@@ -100,21 +119,26 @@ def value(*, null_lo, null_hi, est_lo, est_hi, inf_correction: float = 1e-5,
     >>> x2 = binom.rvs(1, p=p2, size=n).sum()
     >>> prop1 = x1.sum()/n  # Proportion of successes
     >>> prop2 = x2.sum()/n
-    >>> ci1 = (prop1 - prop2) - 1.96*np.sqrt((prop1 *(1-prop1)/n) + (prop2*(1- prop2)/n))
-    >>> ci2 = (prop1 - prop2) + 1.96*np.sqrt((prop1 *(1-prop1)/n) + (prop2*(1- prop2)/n))
+    >>> ci1 = (prop1 - prop2) - 1.96*np.sqrt((prop1 *(1-prop1)/n)
+    ...                                    + (prop2*(1- prop2)/n))
+    >>> ci2 = (prop1 - prop2) + 1.96*np.sqrt((prop1 *(1-prop1)/n)
+    ...                                    + (prop2*(1- prop2)/n))
     >>> sgpv.value(est_lo=ci1, est_hi=ci2, null_lo=-0.2, null_hi=0.2)
-    sgpv(pdelta=array([0.2756205]), deltagap=array([None], dtype=object))
+    sgpv(pdelta=array([0.2756205]),
+         deltagap=array([None], dtype=object))
 
-    #On the log odds ratio scale
+    On the log odds ratio scale
+
     >>> a = x1
     >>> b = x2
     >>> c = 30-x1
     >>> d = 30-x2
-    >>> cior1 = np.log(a*d/(b*c)) - 1.96*np.sqrt(1/a+1/b+1/c+1/d) # Delta-method SE for log odds ratio
+    >>> cior1 = np.log(a*d/(b*c)) - 1.96*np.sqrt(1/a+1/b+1/c+1/d)
     >>> cior2 = np.log(a*d/(b*c)) + 1.96*np.sqrt(1/a+1/b+1/c+1/d)
     >>> sgpv.value(est_lo=cior1, est_hi=cior2,
-                 null_lo=np.log(1/1.5), null_hi=np.log(1.5))
+    ...          null_lo=np.log(1/1.5), null_hi=np.log(1.5))
     sgpv(pdelta=array([0.]), deltagap=array([0.65691], dtype=object))
+
     """
 
     import numpy as np
@@ -150,16 +174,16 @@ def value(*, null_lo, null_hi, est_lo, est_hi, inf_correction: float = 1e-5,
               np.any(null_lo is None) or np.any(null_hi is None))
 
     if (na_any is True) and warnings:
-        print(colored('At least one input is NA', 'red'))
+        print('At least one input is None.')
 
     if (na_any is not True) and np.any(est_len < 0) and np.any(null_len < 0) and warnings:
-        print('At least one interval length is negative')
+        print('At least one interval length is negative.')
 
     if (na_any is not True) and np.any(np.isinf(abs(est_len) + abs(null_len))) and warnings:
-        print('At least one interval has infinite length')
+        print('At least one interval has infinite length.')
 
     if (na_any is not True) and (np.any(est_len == 0) or np.any(null_len == 0)) and warnings:
-        print('At least one interval has zero length')
+        print('At least one interval has zero length.')
 
     # SGPV computation
     overlap = np.minimum(est_hi, null_hi) - np.maximum(est_lo, null_lo)
@@ -187,20 +211,20 @@ def value(*, null_lo, null_hi, est_lo, est_hi, inf_correction: float = 1e-5,
     pdelta[np.isinf(overlap) & np.isinf(bottom) &
            ((est_hi > null_hi) | (est_lo < null_lo))] = 1-inf_correction
 
-    # ## Interval estimate is entire real line and null interval is NOT entire real line
+    # Interval estimate is entire real line and null interval is NOT entire real line
     pdelta[np.isneginf(est_lo) & np.isposinf(est_hi)] = 1/2
 
-    # ## Null interval is entire real line
+    # Null interval is entire real line
     pdelta[np.isneginf(null_lo) & np.isposinf(null_hi)] = None
 
     if np.any(null_lo == np.NINF) & np.any(null_hi == np.inf) and warnings:
         print('At least one null interval is entire real line.')
 
-    # Return NA for nonsense intervals -> not working correctly yet
+    # Return None for nonsense intervals -> not working correctly yet
     pdelta[(est_lo > est_hi) | (null_lo > null_hi)] = None
 
     if (np.any(est_lo > est_hi) or np.any(null_lo > null_hi)) and warnings:
-        print('Some interval limits likely reversed')
+        print('Some interval limits likely reversed.')
 
     # Calculate delta gap
     deltagap = np.repeat(None, len(pdelta))
@@ -229,9 +253,6 @@ def power(*, true: float, null_lo, null_hi, std_err: float = 1,
     """
     Compute power/type I error for Second-Generation p-values approach.
     For now only single input values are fully supported
-    vector inputs are still error-prone
-    No error checks
-
 
     Parameters
     ----------
@@ -252,10 +273,10 @@ def power(*, true: float, null_lo, null_hi, std_err: float = 1,
         sample size(s). The default is 1.
     interval_type : str
         Class of interval estimate used. This determines the functional form of
-        the power function. Options are 'confidence' for a (1-$\alpha$)100%
+        the power function. Options are 'confidence' for a (1-α)100%
         confidence interval and 'likelihood' for a 1/k likelihood support interval.
     interval_level : float
-        Level of interval estimate. If inttype is 'confidence', the level is $\alpha$.
+        Level of interval estimate. If inttype is 'confidence', the level is α.
         If interval_type is 'likelihood', the level is 1/k (not k).
     no_print : bool, optional
         Disable printing of a better formatted output. Default is False,
@@ -271,23 +292,31 @@ def power(*, true: float, null_lo, null_hi, std_err: float = 1,
     -------
     sgpow : tuple
         A list containing the following components:
-            poweralt: Probability of SGPV = 0 calculated assuming the parameter
-                      is equal to true. That is, poweralt = P(SGPV = 0 | $\theta$ = true).
-            powerinc: Probability of 0 < SGPV < 1 calculated assuming the parameter
-                      is equal to true. That is, poweralt = P(0 < SGPV < 1 | $\theta$ = true).
-            powernull: Probability of SGPV = 1 calculated assuming the parameter
-                      is equal to true. That is, poweralt = P(SGPV = 1 | $\theta$ = true).
-            type I error summaries: Named vector that includes different ways
-                                    the type I error may be summarized for an
-                                    interval null hypothesis.
-                        min: min is the minimum type I error over the range
-                            (null_lo, null_hi), which occurs at the midpoint of
-                            (null_lo, null_hi).
-                        max: is the maximum type I error over the range
-                            (null_lo, null_hi), which occurs at the boundaries of
+        poweralt:
+            Probability of SGPV = 0 calculated assuming the parameter
+                  is equal to true. That is, poweralt = P(SGPV = 0 | θ = true).
+        powerinc:
+            Probability of 0 < SGPV < 1 calculated assuming the parameter
+                  is equal to true. That is, poweralt = P(0 < SGPV < 1 | θ = true).
+        powernull:
+            Probability of SGPV = 1 calculated assuming the parameter
+                  is equal to true. That is, poweralt = P(SGPV = 1 | θ = true).
+
+        type I error summaries:
+                                Named vector that includes different ways
+                                the type I error may be summarized for an
+                                interval null hypothesis.
+                    min:
+                        min is the minimum type I error over the range
+                        (null_lo, null_hi), which occurs at the midpoint of
+                        (null_lo, null_hi).
+                    max:
+                        is the maximum type I error over the range
+                        (null_lo, null_hi), which occurs at the boundaries of
                         the null hypothesis, null_lo and null_hi.
-                        mean: is the average type I error (unweighted) over
-                            the range (null_lo, null_hi).
+                    mean:
+                        is the average type I error (unweighted) over
+                        the range (null_lo, null_hi).
                         If 0 is included in the null hypothesis region,
                         then `type I error summaries` also contains at 0,
                         the type I error calculated assuming the true parameter
@@ -307,7 +336,8 @@ def power(*, true: float, null_lo, null_hi, std_err: float = 1,
     type I error summaries:
     at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374
 
-    #Plot the power curve
+    Plot the power curve
+
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> sigma, n = 5, 20
@@ -316,9 +346,10 @@ def power(*, true: float, null_lo, null_hi, std_err: float = 1,
     >>> fig, ax = plt.subplots()
     >>> power = []
     >>> for i in range(len(theta)):
-    ...     power.append(sgpv.power(true=theta[i], null_lo=-1, null_hi=1, std_err=se,
-    ...                interval_type='confidence', interval_level=0.05,
-                       no_print=True ).poweralt)
+    ...     power.append(
+                sgpv.power(true=theta[i], null_lo=-1, null_hi=1,
+    ...                 std_err=se, interval_type='confidence',
+    ...                 interval_level=0.05, no_print=True ).poweralt)
     >>> ax.plot(theta, power)
     >>> ax.set_xlabel('theta')
     >>> ax.set_ylabel('power')
@@ -326,12 +357,17 @@ def power(*, true: float, null_lo, null_hi, std_err: float = 1,
     import numpy as np
     from scipy import integrate
     from scipy.stats import norm
-    from collections import namedtuple  # for better naming of the output
-    # Need to learn error handling
-    # TODO: Add more checks to make sure that only scalars are used as input
+    from collections import namedtuple
+
+    # Input checks
     if interval_type not in ['confidence', 'likelihood']:
         raise ValueError("'interval_type' must be one of the following:\
              \n   'confidence'  or  'likelihood'")
+
+    inputs = ['null_lo', 'null_hi', 'true', 'std_err', 'interval_level']
+    for index, val in enumerate([null_lo, null_hi, true, std_err, interval_level]):
+        if np.asarray(val).size != 1:
+            raise ValueError(f"The argument {inputs[index]} must be a scalar.")
 
     if interval_type == 'confidence':
         Z = norm.ppf(1-interval_level/2)
@@ -380,9 +416,9 @@ def power(*, true: float, null_lo, null_hi, std_err: float = 1,
         TypeI = namedtuple('typeI', 'at0, min, max, mean')
         typeI = TypeI(round(pow0(0), 7), round(minI, 7),
                       round(maxI, 7), round(avgI, 7))
+
     # more bonus: P(inc | null) (basically analogous to type II error but for confirmation)
     # (TBD)
-    # Displaying of bonus statistics not correct yet
     if no_print is False:
         print('poweralt =', round(power0, 7), 'powerinc =', round(powerinc, 7),
               'powernull = ', round(power1, 7), '\n type I error summaries: \n',
@@ -397,9 +433,6 @@ def risk(*, sgpval: int = 0, null_lo: float, null_hi: float, std_err: float,
            alt_weights: str, alt_space, pi0: float = 0.5):
     """False Discovery Risk for Second-Generation p-values.
 
-    TODO:  Add user-defined expections for better error handling:
-                see https://docs.python.org/3/tutorial/errors.html
-
     Parameters
     ----------
     sgpval : int, optional
@@ -413,14 +446,14 @@ def risk(*, sgpval: int = 0, null_lo: float, null_hi: float, std_err: float,
         second-generation p-value was based.
     std_err : float
         Standard error of the point estimate.
-    interval_type : STRING
+    interval_type : str
         Class of interval estimate used. This determines the functional form of
-        the power function. Options are 'confidence' for a (1-$\alpha$)100 %
+        the power function. Options are 'confidence' for a (1-α)100 %
         confidence interval and 'likelihood' for a 1/k likelihood support interval.
     interval_level : float
-        Level of interval estimate. If inttype is 'confidence', the level is $\alpha$.
+        Level of interval estimate. If inttype is 'confidence', the level is α.
         If interval_type is 'likelihood', the level is 1/k (not k).
-    null_weights : STRING
+    null_weights : str
         Probability distribution for the null parameter space.
         Options are currently 'Point', 'Uniform', and 'TruncNormal'.
     null_space : array_like
@@ -452,6 +485,7 @@ def risk(*, sgpval: int = 0, null_lo: float, null_hi: float, std_err: float,
     res: float
         Numeric scalar representing the False discovery risk (FDR) or
         false confirmation risk (FCR) for the observed second-generation p-value.
+
         If sgpval = 0, the function returns false discovery risk (FDR).
         If sgpval = 1, the function returns false confirmation risk (FCR).
 
@@ -460,46 +494,67 @@ def risk(*, sgpval: int = 0, null_lo: float, null_hi: float, std_err: float,
     >>> import sgpv
     >>> import numpy as np
     >>> from scipy.stats import norm
-    # false discovery risk with 95% confidence level
-    >>> sgpv.risk(sgpval = 0, null_lo = np.log(1/1.1), null_hi = np.log(1.1),
-               std_err = 0.8, null_weights = 'Uniform',
-               null_space = (np.log(1/1.1), np.log(1.1)), alt_weights = 'Uniform',
-               alt_space = (2 + 1*norm.ppf(1-0.05/2)*0.8, 2 - 1*norm.ppf(1-0.05/2)*0.8),
-               interval_type = 'confidence', interval_level = 0.05)
+
+    False discovery risk with 95% confidence level
+
+    >>> sgpv.risk(sgpval = 0, null_lo = np.log(1/1.1),
+                  null_hi = np.log(1.1), std_err = 0.8,
+                  null_weights = 'Uniform',
+               null_space = (np.log(1/1.1), np.log(1.1)),
+               alt_weights = 'Uniform',
+               alt_space = (2 + 1*norm.ppf(1-0.05/2)*0.8,
+                            2 - 1*norm.ppf(1-0.05/2)*0.8),
+               interval_type = 'confidence',
+               interval_level = 0.05)
     0.0594986
 
-    # false discovery risk with 1/8 likelihood support level
-    >>> sgpv.risk(sgpval = 0,  null_lo = np.log(1/1.1), null_hi = np.log(1.1),
-               std_err = 0.8,  null_weights = 'Point',  null_space = 0,
+    False discovery risk with 1/8 likelihood support level
+
+    >>> sgpv.risk(sgpval = 0,  null_lo = np.log(1/1.1),
+                  null_hi = np.log(1.1), std_err = 0.8,
+                  null_weights = 'Point',  null_space = 0,
                alt_weights = 'Uniform',
-               alt_space = (2 + 1*norm.ppf(1-0.041/2)*0.8, 2 - 1*norm.ppf(1-0.041/2)*0.8),
-               interval_type = 'likelihood',  interval_level = 1/8)
+               alt_space = (2 + 1*norm.ppf(1-0.041/2)*0.8,
+                            2 - 1*norm.ppf(1-0.041/2)*0.8),
+               interval_type = 'likelihood',
+               interval_level = 1/8)
     0.0505552
 
-    ## with truncated normal weighting distribution
-    >>> sgpv.risk(sgpval = 0,  null_lo = np.log(1/1.1), null_hi = np.log(1.1),
-               std_err = 0.8,  null_weights = 'Point',
+   With truncated normal weighting distribution
+
+    >>> sgpv.risk(sgpval = 0,  null_lo = np.log(1/1.1),
+                  null_hi = np.log(1.1), std_err = 0.8,
+                  null_weights = 'Point',
                null_space = 0,  alt_weights = 'TruncNormal',
-               alt_space = (2 + 1*norm.ppf(1-0.041/2)*0.8, 2 - 1*norm.ppf(1-0.041/2)*0.8),
-               interval_type = 'likelihood',  interval_level = 1/8)
+               alt_space = (2 + 1*norm.ppf(1-0.041/2)*0.8,
+                            2 - 1*norm.ppf(1-0.041/2)*0.8),
+               interval_type = 'likelihood',
+               interval_level = 1/8)
     0.0490258
 
-    # false discovery risk with LSI and wider null hypothesis
-    >>> sgpv.risk(sgpval = 0,  null_lo = np.log(1/1.5), null_hi = np.log(1.5),
-               std_err = 0.8,  null_weights = 'Point',  null_space = 0,
+    False discovery risk with LSI and wider null hypothesis
+
+    >>> sgpv.risk(sgpval = 0,  null_lo = np.log(1/1.5),
+                  null_hi = np.log(1.5), std_err = 0.8,
+                  null_weights = 'Point',  null_space = 0,
                alt_weights = 'Uniform',
-               alt_space = (2.5 + 1*norm.ppf(1-0.041/2)*0.8, 2.5 - 1*norm.ppf(1-0.041/2)*0.8),
-               interval_type = 'likelihood',  interval_level = 1/8)
+               alt_space = (2.5 + 1*norm.ppf(1-0.041/2)*0.8,
+                            2.5 - 1*norm.ppf(1-0.041/2)*0.8),
+               interval_type = 'likelihood',
+               interval_level = 1/8)
     0.0168835
 
-    # false confirmation risk example
-    >>> sgpv.risk(sgpval = 1,  null_lo = np.log(1/1.5), null_hi = np.log(1.5),
-               std_err = 0.15,  null_weights = 'Uniform',
+    False confirmation risk example
+
+    >>> sgpv.risk(sgpval = 1,  null_lo = np.log(1/1.5),
+                  null_hi = np.log(1.5), std_err = 0.15,
+                  null_weights = 'Uniform',
                null_space = (0.01 + 1*norm.ppf(1-0.041/2)*0.15,
                              0.01 - 1*norm.ppf(1-0.041/2)*0.15),
                alt_weights = 'Uniform',
                alt_space = (np.log(1.5), 1.25*np.log(1.5)),
-               interval_type = 'likelihood',  interval_level = 1/8)
+               interval_type = 'likelihood',
+               interval_level = 1/8)
     0.0305952
 
     """
@@ -526,6 +581,7 @@ def risk(*, sgpval: int = 0, null_lo: float, null_hi: float, std_err: float,
             'Values for option pi0 need to lie within the exclusive 0 - 1 interval.\
          A prior probability outside of this interval is not sensible.\
          The default value assumes that both hypotheses are equally likely.')
+
     if null_weights not in ['Point', 'Uniform', 'TruncNormal']:
         raise ValueError('Option null_weights must be one of the following:\
                          Point, Uniform or TruncNormal.')
@@ -543,7 +599,7 @@ def risk(*, sgpval: int = 0, null_lo: float, null_hi: float, std_err: float,
 
     if sgpval == 0:
         def power(x): return sgpv.power(true=x, null_lo=null_lo, null_hi=null_hi,
-                                        std_err=std_err, 
+                                        std_err=std_err,
                                         interval_type=interval_type,
                                         interval_level=interval_level,
                                         no_print=True).poweralt
@@ -620,7 +676,7 @@ def risk(*, sgpval: int = 0, null_lo: float, null_hi: float, std_err: float,
 
         P_sgpv_H1 = power(x=alt_space)
 
-    # P.sgpv.H1 averaged: check `alt.space` input
+    # P.sgpv.H1 averaged: check 'alt_space' input
     if alt_weights in ['Uniform', 'TruncNormal']:
         if alt_space.size < 2:
             raise ValueError('alt space must not be a point to use averaging methods')
@@ -642,7 +698,7 @@ def risk(*, sgpval: int = 0, null_lo: float, null_hi: float, std_err: float,
     # P.sgpv.H1 averaged using truncated normal as weighting
     # distribution function
     if alt_weights == "TruncNormal":
-        # default: mean of Normal distr at midpoint of alt.space
+        # default: mean of Normal distr at midpoint of alt_space
         truncNorm_mu = np.mean(alt_space)
         # default: std. dev of Normal distr same as assumed for
         # estimator
@@ -657,7 +713,6 @@ def risk(*, sgpval: int = 0, null_lo: float, null_hi: float, std_err: float,
                             truncNorm_mu, truncNorm_sd)) ** (- 1))
         P_sgpv_H1 = integrate.quad(integrand, min(alt_space), max(alt_space))[0]
 
-
     # Calculate FDR or FCR
     if sgpval == 0:
         Fdr = (1 + P_sgpv_H1 / P_sgpv_H0 * (1 - pi0) / pi0) ** (- 1)
@@ -668,10 +723,10 @@ def risk(*, sgpval: int = 0, null_lo: float, null_hi: float, std_err: float,
     # if FDR, Fcr is None, so c(Fdr, Fcr)=Fdr, and if FCR, Fdr is None,
     if Fdr is not None:
         res = round(Fdr, 7)
-        # val = 'Fdr'
+
     elif Fcr is not None:
         res = round(Fcr, 7)
-        # val = 'Fcr :'
+
     return res
 
 
@@ -700,29 +755,31 @@ def plot(*, est_lo, est_hi, null_lo, null_hi,
     null_hi : float
         A scalar representing the upper bound of null interval (indifference zone).
         Value must be finite.
-    set_order : TYPE, optional
-         The default is 'sgpv'. A numeric vector giving the desired order along the x-axis.
+    set_order : , optional
+         A numeric vector giving the desired order along the x-axis.
          If set_order is set to 'sgpv', the second-generation p-value ranking is used.
          If set_order is set to None, the original input ordering is used.
          Default is 'sgpv'.
     x_show : int, optional
          A scalar representing the maximum ranking on the x-axis that
          is displayed. Default is to display all intervals.
-    null_col : TYPE, optional
+    null_col : valid_color, optional
         Coloring of the null interval (indifference zone).
         The default is Hawkes Blue: (0.815, 0.847, 0.909, 1) .
-    int_col : TYPE, optional
+    int_col : valid_colors, optional
         Coloring of the intervals according to SGPV ranking.
         Default is ('cornflowerblue', 'darkslateblue', 'firebrick') for SGPVs
         of 1, in (0,1), and 0 respectively.
-    plot_axis : TYPE, optional
+        Provide a list of three colors to replace the default colors.
+    plot_axis : bool, optional
         Toggle for default axis plotting. The default is True.
-    null_pt : TYPE, optional
+    null_pt : float, optional
         A scalar representing a point null hypothesis. If set,
         the function will draw a horizontal dashed black line at this location.
         The default is None.
     outline_zone : bool, optional
-        DESCRIPTION. The default is True.
+       Toggle for drawing a slim white outline around the null zone.
+       Helpful visual aid when plotting many intervals. The default is True.
     title_lab : str, optional
         Title text. The default is "Title".
     x_lab : str, optional
@@ -732,33 +789,36 @@ def plot(*, est_lo, est_hi, null_lo, null_hi,
     legend : bool, optional
         Toggle for plotting the legend. The default is True.
 
-    Returns
-    -------
+    Return
+    ------
+
     None.
 
+    Example
+    -------
 
-    Examples
-    --------
-    import pandas as pd
-    import sgpv
-    import data
-    import matplotlib.pyplot as plt
-    df = data.load_dataset()  # Load the example dataset as a dataframe
-    est_lo=df['ci.lo']
-    est_hi=df['ci.hi']
-    pvalue=df['p.value']
-    null_lo=-0.3
-    null_hi=0.3
-    title_lab="Leukemia Example"
-    y_lab="Fold Change (base 10)"
-    x_lab="Classical p-value ranking"
-    sgpv.plot(est_lo=est_lo, est_hi=est_hi, null_lo=null_lo, null_hi=null_hi,
-             set_order=pvalue, null_pt=0, x_show=7000, outline_zone=True,
-             title_lab=title_lab, y_lab=y_lab, x_lab=x_lab )
-    plt.yticks(ticks=np.round(np.log10(np.asarray(
-        (1/1000,1/100,1/10,1/2,1,2,10,100,1000))),2), labels=(
-                           '1/1000','1/100','1/10','1/2',1,2,10,100,1000))
-   plt.show()
+    >>> import pandas as pd
+    >>> import sgpv
+    >>> import data
+    >>> import matplotlib.pyplot as plt
+    >>> df = data.load_dataset()  # Load the example dataset as a dataframe
+    >>> est_lo=df['ci.lo']
+    >>> est_hi=df['ci.hi']
+    >>> pvalue=df['p.value']
+    >>> null_lo=-0.3
+    >>> null_hi=0.3
+    >>> title_lab="Leukemia Example"
+    >>> y_lab="Fold Change (base 10)"
+    >>> x_lab="Classical p-value ranking"
+    >>> sgpv.plot(est_lo=est_lo, est_hi=est_hi, null_lo=null_lo,
+    ...              null_hi=null_hi, set_order=pvalue, null_pt=0,
+    ...              x_show=7000, outline_zone=True,
+    ...            title_lab=title_lab, y_lab=y_lab, x_lab=x_lab )
+    >>> plt.yticks(ticks=np.round(np.log10(np.asarray(
+    ...        (1/1000,1/100,1/10,1/2,1,2,10,100,1000))),2), labels=(
+    ...                           '1/1000','1/100','1/10',
+                                    '1/2',1,2,10,100,1000))
+    >>> plt.show()
    """
 
     import numpy as np
@@ -766,8 +826,7 @@ def plot(*, est_lo, est_hi, null_lo, null_hi,
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
     from matplotlib import collections as mc
-    from sgpvalue import sgpvalue
-
+    # import sgpv
     # Convert inputs
     # Create dataframe to make sorting and using x_show option easier
     data = pd.DataFrame({'est_lo': est_lo, 'est_hi': est_hi, 'null_lo': null_lo,
@@ -797,8 +856,8 @@ def plot(*, est_lo, est_hi, null_lo, null_hi,
                 np.ceil(np.maximum(np.amax(est_lo), np.amax(est_hi))))
 
     # Compute SGPVs
-    sgpv = sgpvalue(est_lo=est_lo, est_hi=est_hi,
-                    null_lo=null_lo, null_hi=null_hi)
+    sgpv = value(est_lo=est_lo, est_hi=est_hi,
+                 null_lo=null_lo, null_hi=null_hi)
     sgpv.deltagap[np.where(sgpv.pdelta == 0)] = -sgpv.deltagap[np.where(sgpv.pdelta == 0)]
     data['pdelta'] = sgpv.pdelta
     data['deltagap'] = sgpv.deltagap
@@ -844,7 +903,7 @@ def plot(*, est_lo, est_hi, null_lo, null_hi,
     # a ranged bar plot similar to Stata or a segment plot like R
     for i in range(len(sets)):
         intervals = _genpoints(x[sets[i]], data['est_lo'].iloc[sets[i]],
-                              data['est_hi'].iloc[sets[i]])
+                               data['est_hi'].iloc[sets[i]])
         lc = mc.LineCollection(intervals, colors=int_col[i], linewidths=0.8)
         ax.add_collection(lc)
         patches.append(mpatches.Patch(color=int_col[i], label=labels[i]))
