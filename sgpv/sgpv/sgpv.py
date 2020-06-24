@@ -77,7 +77,7 @@ def value(*, null_lo, null_hi, est_lo, est_hi, inf_correction: float = 1e-5,
     Simple example for three estimated log odds ratios but the same null interval
 
     >>> import numpy as np
-    >>> import sgpv
+    >>> from sgpv import sgpv
     >>> lb = (np.log(1.05), np.log(1.3), np.log(0.97))
     >>> ub = (np.log(1.8), np.log(1.8), np.log(1.02))
     >>> sgpv.value(est_lo = lb, est_hi = ub,
@@ -111,7 +111,6 @@ def value(*, null_lo, null_hi, est_lo, est_hi, inf_correction: float = 1e-5,
     Simulated two-group dichotomous data for different parameters
 
     >>> from scipy.stats import binom
-    >>> from statsmodels.stats.proportion import proportions_ztest
     >>> np.random.seed(1492)
     >>> n = 30
     >>> p1, p2 = 0.15, 0.50
@@ -324,7 +323,7 @@ def power(*, true: float, null_lo, null_hi, std_err: float = 1,
 
     Examples
     --------
-    >>> import sgpv
+    >>> from sgpv import sgpv
     >>> sgpv.power(true=2, null_lo=-1, null_hi=1, std_err = 1,
     ...        interval_type='confidence', interval_level=0.05)
     poweralt = 0.168537 powerinc = 0.831463 powernull =  0
@@ -491,7 +490,7 @@ def risk(*, sgpval: int = 0, null_lo: float, null_hi: float, std_err: float,
 
     Examples
     -------
-    >>> import sgpv
+    >>> from sgpv import sgpv
     >>> import numpy as np
     >>> from scipy.stats import norm
 
@@ -561,7 +560,7 @@ def risk(*, sgpval: int = 0, null_lo: float, null_hi: float, std_err: float,
     import numpy as np
     from scipy import integrate
     from scipy.stats import norm
-    import sgpv
+    from sgpv import sgpv
 
     # Convert inputs into arrays for easier handling
     null_space = np.asarray(null_space, dtype=np.float64)
@@ -798,10 +797,10 @@ def plot(*, est_lo, est_hi, null_lo, null_hi,
     -------
 
     >>> import pandas as pd
-    >>> import sgpv
-    >>> import data
+    >>> from sgpv import sgpv
+    >>> from sgpv import data
     >>> import matplotlib.pyplot as plt
-    >>> df = data.load_dataset()  # Load the example dataset as a dataframe
+    >>> df = data.load()  # Load the example dataset as a dataframe
     >>> est_lo=df['ci.lo']
     >>> est_hi=df['ci.hi']
     >>> pvalue=df['p.value']

@@ -22,9 +22,10 @@ References:
 
  Source: https://github.com/ramhiser/datamicroarray/wiki/Golub-(1999)
 """
+# Copied code from statsmodels.datasets.utils to add allow import of dataset from
+# module directory
 
-
-def load_dataset():
+def load():
     """
     Load the example
 
@@ -34,6 +35,23 @@ def load_dataset():
         A dataframe containing the dataset.
 
     """
-    import pandas as pd
-    df = pd.read_csv('leukstats.csv', index_col=0)
+    df = load_csv(__file__, 'leukstats.csv', index_col=0, convert_float=True)
     return df
+
+
+# Directly copied from statsmodels.datasets.utils and added an index_col argument
+def load_csv(base_file, csv_name, index_col, sep=',', convert_float=False):
+    from os.path import dirname, abspath, join
+    from pandas import read_csv
+    """Standard simple csv loader"""
+    filepath = dirname(abspath(base_file))
+    filename = join(filepath, csv_name)
+    engine = 'python' if sep != ',' else 'c'
+    float_precision = {}
+    if engine == 'c':
+        float_precision = {'float_precision': 'high'}
+    data = read_csv(filename, sep=sep, engine=engine, index_col=index_col,
+                    **float_precision)
+    if convert_float:
+        data = data.astype(float)
+    return data

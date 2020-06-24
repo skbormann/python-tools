@@ -23,6 +23,7 @@ This module depends on:
             numpy>=1.18.0
 
             scipy>=1.3.2
+            
 
 
 These dependencies document only under which version I tested my functions.
@@ -45,7 +46,7 @@ Below are some examples taken from the documentation of each function:
 ## Calculate second generation p-values (sgpv.value):
 ```python
 >>> import numpy as np
->>> import sgpv
+>>> from sgpv import sgpv
 >>> lb = (np.log(1.05), np.log(1.3), np.log(0.97))
 >>> ub = (np.log(1.8), np.log(1.8), np.log(1.02))
 >>> sgpv.value(est_lo = lb, est_hi = ub,
@@ -56,7 +57,7 @@ Below are some examples taken from the documentation of each function:
 
 ## Power function(sgpv.power) 
 ```python
->>> import sgpv       
+>>> from sgpv import sgpv       
 >>> sgpv.power(true=2, null_lo=-1, null_hi=1, std_err = 1,
 ...        interval_type='confidence', interval_level=0.05)
 poweralt = 0.168537 powerinc = 0.831463 powernull =  0
@@ -71,7 +72,7 @@ at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374
 
 ## False discory risk(sgpv.risk)   
 ```python           
->>> import sgpv
+>>> from sgpv import sgpv
 >>> import numpy as np
 >>> from scipy.stats import norm
 >>> sgpv.risk(sgpval = 0, null_lo = np.log(1/1.1), null_hi = np.log(1.1),
@@ -85,8 +86,8 @@ at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374
 ## Plotting of SGPVs with example dataset:
 ```python
 >>> import pandas as pd
->>> import sgpv
->>> import data
+>>> from sgpv import sgpv
+>>> from sgpv import data
 >>> import matplotlib.pyplot as plt
 >>> df = data.load_dataset()  # Load the example dataset as a dataframe
 >>> est_lo=df['ci.lo']
@@ -106,7 +107,10 @@ at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374
 >>> plt.show()
 ```
 
+# Release history
 
+* Version 1.0.0 24.06.2020: Initial release
+* Version 1.0.1 25.06.2020: Fixed incorrect imports in examples and modified code for importing the example dataset based on code found in statsmodels.datasets.utils. 
 
 
  
