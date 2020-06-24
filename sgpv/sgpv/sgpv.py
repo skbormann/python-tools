@@ -352,6 +352,7 @@ def power(*, true: float, null_lo, null_hi, std_err: float = 1,
     >>> ax.plot(theta, power)
     >>> ax.set_xlabel('theta')
     >>> ax.set_ylabel('power')
+    >>> plt.show()
     """
     import numpy as np
     from scipy import integrate
@@ -796,7 +797,6 @@ def plot(*, est_lo, est_hi, null_lo, null_hi,
     Example
     -------
 
-    >>> import pandas as pd
     >>> from sgpv import sgpv
     >>> from sgpv import data
     >>> import matplotlib.pyplot as plt
