@@ -2,9 +2,10 @@
 
 This module allows to calculate Second Generation P-Values and their diagnostics in Python.
 This package is a translation of the original  [sgpv R-library](https://github.com/weltybiostat/sgpv) into Python.
-The same library has already been translated into [Stata](https://github.com/skbormann/stata-tools/sgpv) by me.
+The same library has already been translated into [Stata](https://github.com/skbormann/stata-tools/sgpv) by the author of this Python translation.
 
 This module contains the following functions:
+
             value    - calculate the SGPVs
             power    - power functions for the SGPVs
             risk     - false confirmation/discovery risks for the SGPVs
@@ -14,28 +15,35 @@ This module contains the following functions:
 # Dependencies
 
 This module depends on: 
-pandas>=1.0.4
-matplotlib>=3.2.1
-numpy>=1.18.0
-scipy>=1.3.2
+
+            pandas>=1.0.4
+
+            matplotlib>=3.2.1
+
+            numpy>=1.18.0
+
+            scipy>=1.3.2
+
 
 These dependencies document only under which version I tested my functions.
 Older version might work as well. 
 
 # Installation
-Binaries and source distributions will be available (soon) from PyPi
+Binaries and source distributions are available from PyPi
 [https://pypi.org/projects/sgpv](https://pypi.org/projects/sgpv)
 
-The same installation files will be also located in the folder dist
-(https://github.com/skbormann/python-tools/sgpv/dist)
+
+The same installation files are also located in the folder [dist](https://github.com/skbormann/python-tools/sgpv/dist).
 Just download the tarball and unzip it. Then run
->>>python setup.py install
+```python
+python setup.py install
+```
 
 # Examples
 Below are some examples taken from the documentation of each function:
 
 ## Calculate second generation p-values (sgpv.value):
-
+```python
 >>> import numpy as np
 >>> import sgpv
 >>> lb = (np.log(1.05), np.log(1.3), np.log(0.97))
@@ -44,8 +52,10 @@ Below are some examples taken from the documentation of each function:
              null_lo = np.log(1/1.1), null_hi = np.log(1.1))
     sgpv(pdelta=array([0.1220227, 0.        , 1.        ]),
      deltagap=array([None, 1.7527413, None], dtype=object))
-         
+```
+
 ## Power function(sgpv.power) 
+```python
 >>> import sgpv       
 >>> sgpv.power(true=2, null_lo=-1, null_hi=1, std_err = 1,
 ...        interval_type='confidence', interval_level=0.05)
@@ -56,10 +66,11 @@ at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374
 ...         interval_type='confidence', interval_level=0.05)
 poweralt = 0.0030768 powerinc = 0.9969232 powernull =  0
 type I error summaries:
-at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374   
-    
+at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374 
+```
+
 ## False discory risk(sgpv.risk)   
-           
+```python           
 >>> import sgpv
 >>> import numpy as np
 >>> from scipy.stats import norm
@@ -69,8 +80,10 @@ at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374
            alt_space = (2 + 1*norm.ppf(1-0.05/2)*0.8, 2 - 1*norm.ppf(1-0.05/2)*0.8),
            interval_type = 'confidence', interval_level = 0.05)
 0.0594986
+```
 
 ## Plotting of SGPVs with example dataset:
+```python
 >>> import pandas as pd
 >>> import sgpv
 >>> import data
@@ -91,7 +104,7 @@ at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374
 ...        (1/1000,1/100,1/10,1/2,1,2,10,100,1000))),2), labels=(
 ...                           '1/1000','1/100','1/10','1/2',1,2,10,100,1000))
 >>> plt.show()
-
+```
 
 
 
