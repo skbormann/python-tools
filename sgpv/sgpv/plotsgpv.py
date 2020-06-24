@@ -6,7 +6,7 @@ def plotsgpv(*, est_lo, est_hi, null_lo, null_hi,
              int_col=('cornflowerblue', 'darkslateblue', 'firebrick'),
              plot_axis=True, null_pt=None, outline_zone=True,
              title_lab="Title", x_lab="Position (by set_order)",
-             y_lab="Outcome label", legend_on=True):
+             y_lab="Outcome label", legend=True):
     """
     Plot interval estimates according to Second-Generation p-value rankings
     NOTE: Some options and details of the R-code were not implemented because
@@ -46,19 +46,16 @@ def plotsgpv(*, est_lo, est_hi, null_lo, null_hi,
         A scalar representing a point null hypothesis. If set,
         the function will draw a horizontal dashed black line at this location.
         The default is None.
-    outline_zone : TYPE, optional
+    outline_zone : bool, optional
         DESCRIPTION. The default is True.
-    title_lab : TYPE, optional
+    title_lab : str, optional
         Title text. The default is "Title".
     x_lab : str, optional
         x-axis label. The default is "Position (by setorder)".
     y_lab : str, optional
         y-axis label. The default is "Outcome label".
-    legend_on : str, optional
+    legend : bool, optional
         Toggle for plotting the legend. The default is True.
-    plot_opt : ,optional
-        Additional plotting options. Only options for matplotlib are valid and
-        will override previous settings.
 
     Returns
     -------
@@ -68,7 +65,9 @@ def plotsgpv(*, est_lo, est_hi, null_lo, null_hi,
     Examples
     --------
     import pandas as pd
-    df = pd.read_csv('../data/leukstats.csv', index_col=0)
+    from plotsgpv import plotsgpv
+    import matplotlib.pyplot as plt
+    df = pd.read_csv('leukstats.csv', index_col=0)
     est_lo=df['ci.lo']
     est_hi=df['ci.hi']
     pvalue=df['p.value']
@@ -90,6 +89,7 @@ def plotsgpv(*, est_lo, est_hi, null_lo, null_hi,
     import pandas as pd
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
+    from matplotlib import collections as mc
     from sgpvalue import sgpvalue
 
     # Convert inputs
@@ -115,13 +115,14 @@ def plotsgpv(*, est_lo, est_hi, null_lo, null_hi,
         x_show = len(est_lo)
 
     x_max = len(est_lo)
-    x = np.arange(1, x_max+1, 1)  # Is x really needed or just a take over from R?
-    x_limits = (1, np.minimum(x_show, x_max))  
+    x = np.arange(1, x_max+1, 1)
+    x_limits = (1, np.minimum(x_show, x_max))
     y_limits = (np.floor(np.minimum(np.amin(est_lo), np.amin(est_hi))),
                 np.ceil(np.maximum(np.amax(est_lo), np.amax(est_hi))))
 
     # Compute SGPVs
-    sgpv = sgpvalue(est_lo=est_lo, est_hi=est_hi, null_lo=null_lo, null_hi=null_hi)
+    sgpv = sgpvalue(est_lo=est_lo, est_hi=est_hi,
+                    null_lo=null_lo, null_hi=null_hi)
     sgpv.deltagap[np.where(sgpv.pdelta == 0)] = -sgpv.deltagap[np.where(sgpv.pdelta == 0)]
     data['pdelta'] = sgpv.pdelta
     data['deltagap'] = sgpv.deltagap
@@ -163,12 +164,13 @@ def plotsgpv(*, est_lo, est_hi, null_lo, null_hi,
                     color=null_col, label='Interval Null')
     patches.append(mpatches.Patch(color=null_col, label='Interval Null'))
 
-    # SGPV-intervals
-    # Color is not correctly set
+    # SGPV-intervals -> Use lineCollection because matplotlib does not have
+    # a ranged bar plot similar to Stata or a segment plot like R
     for i in range(len(sets)):
-        interval = genpoints(x[sets[i]], data['est_lo'].iloc[sets[i]],
-                             data['est_hi'].iloc[sets[i]])
-        intervals(interval, int_col[i], ax)
+        intervals = _genpoints(x[sets[i]], data['est_lo'].iloc[sets[i]],
+                              data['est_hi'].iloc[sets[i]])
+        lc = mc.LineCollection(intervals, colors=int_col[i], linewidths=0.8)
+        ax.add_collection(lc)
         patches.append(mpatches.Patch(color=int_col[i], label=labels[i]))
 
     # Detail indifference zone
@@ -181,64 +183,41 @@ def plotsgpv(*, est_lo, est_hi, null_lo, null_hi,
                 color='w', linewidth=0.8, label='Interval Null')
 
     # Legend
-    if legend_on:
+    if legend:
         ax.legend(handles=patches, loc='upper right')
 
     return fig, ax
 
 
-def genpoints(xlist, lbound, ubound):
-    """
+# Additonal helper function for plotting to shorten the code
+def _genpoints(xlist, lbound, ubound):
+    """Generate the points necessary to plot the lines showing the interval
+    estimates.
+
     Parameters
     ----------
-    xlist : TYPE
-        DESCRIPTION.
-    lbound : TYPE
-        DESCRIPTION.
-    ubound : TYPE
-        DESCRIPTION.
+    xlist : array_like
+        Array of values on the x-axis.
+    lbound : array_like
+        Lower bounds of the estimates.
+    ubound : array_like
+        Upper bounds of the estimates.
 
     Returns
     -------
-    points : TYPE
-        DESCRIPTION.
+    points : list
+        List of start and end points for plotting the interval estimates.
 
     """
     xlist = xlist.tolist().copy()
     lbound = lbound.tolist().copy()
     ubound = ubound.tolist().copy()
-
     # Alternative approach -> shorter, seen in
     # https://pandas.pydata.org/docs/getting_started/10min.html Stack example
     xtemp = list(zip(*[xlist, xlist]))
-
     inttemp = list(zip(*[lbound, ubound]))
-
     points = []
     for xnew, ynew in zip(xtemp, inttemp):
         points.append(list(zip(xnew, ynew)))
 
     return points
-
-
-def intervals(points, color, figure):
-    """
-
-    Parameters
-    ----------
-    points : TYPE
-        DESCRIPTION.
-    color : TYPE
-        DESCRIPTION.
-    figure : TYPE
-        DESCRIPTION.
-
-    Returns
-    -------
-    None.
-
-    """
-    from matplotlib import collections as mc
-
-    lc = mc.LineCollection(points, colors=color, linewidths=0.8)
-    figure.add_collection(lc)

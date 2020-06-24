@@ -2,49 +2,73 @@
 
 
 def sgpower(*, true: float, null_lo, null_hi, std_err: float = 1,
-            interval_type: str, interval_level: float):
+            interval_type: str, interval_level: float, no_print: False):
     """
-        Compute power/type I error for Second-Generation p-values approach.
+    Compute power/type I error for Second-Generation p-values approach.
     For now only single input values are fully supported
     vector inputs are still error-prone
     No error checks
-    Add user-defined expections for better error handling:
-        see https://docs.python.org/3/tutorial/errors.html
+
 
     Parameters
     ----------
     true : float
-        The true value for the parameter of interest at which to calculate power. 
+        The true value for the parameter of interest at which to calculate power.
         This is on the absolute scale of the parameter, and not the standard
         deviation or standard error scale.
-    null_lo : TYPE
-        The lower bound of the indifference zone (null interval) upon which the 
+    null_lo : float
+        The lower bound of the indifference zone (null interval) upon which the
         second-generation p-value is based.
-    null_hi : TYPE
+    null_hi : float
         The upper bound of the indifference zone (null interval) upon which the
         second-generation p-value is based.
     std_err : float, optional
-        Standard error for the distribution of the estimator for the parameter of interest. 
-        This is the standard deviation for the estimator, not the standard 
-        deviation parameter for the data itself. This will be a function of the 
+        Standard error for the distribution of the estimator for the parameter of interest.
+        This is the standard deviation for the estimator, not the standard
+        deviation parameter for the data itself. This will be a function of the
         sample size(s). The default is 1.
     interval_type : str
         Class of interval estimate used. This determines the functional form of
-        the power function. Options are 'confidence' for a (1-$\alpha$)100\%
+        the power function. Options are 'confidence' for a (1-$\alpha$)100%
         confidence interval and 'likelihood' for a 1/k likelihood support interval.
     interval_level : float
-        Level of interval estimate. If inttype is 'confidence', the level is $\alpha$. 
+        Level of interval estimate. If inttype is 'confidence', the level is $\alpha$.
         If interval_type is 'likelihood', the level is 1/k (not k).
+    no_print : bool, optional
+        Disable printing of a better formatted output. Default is False,
+        so that many lines maybe printed if sgpower is used repeatedly.
 
     Raises
     ------
-    to
-        DESCRIPTION.
+    ValueError
+        Indicates that some value was outside of the expected range or
+        outside of the accepted options.
 
     Returns
     -------
-    res : TYPE
-        DESCRIPTION.
+    sgpow : tuple
+        A list containing the following components:
+            poweralt: Probability of SGPV = 0 calculated assuming the parameter
+                      is equal to true. That is, poweralt = P(SGPV = 0 | $\theta$ = true).
+            powerinc: Probability of 0 < SGPV < 1 calculated assuming the parameter
+                      is equal to true. That is, poweralt = P(0 < SGPV < 1 | $\theta$ = true).
+            powernull: Probability of SGPV = 1 calculated assuming the parameter
+                      is equal to true. That is, poweralt = P(SGPV = 1 | $\theta$ = true).
+            type I error summaries: Named vector that includes different ways 
+                                    the type I error may be summarized for an 
+                                    interval null hypothesis.
+                        min: min is the minimum type I error over the range
+                            (null_lo, null_hi), which occurs at the midpoint of
+                            (null_lo, null_hi).
+                        max: is the maximum type I error over the range
+                            (null_lo, null_hi), which occurs at the boundaries of
+                        the null hypothesis, null_lo and null_hi.
+                        mean: is the average type I error (unweighted) over
+                            the range (null_lo, null_hi). 
+                        If 0 is included in the null hypothesis region,
+                        then `type I error summaries` also contains at 0,
+                        the type I error calculated assuming the true parameter
+                        value θ is equal to 0.
 
     Examples
     --------
@@ -59,7 +83,9 @@ def sgpower(*, true: float, null_lo, null_hi, std_err: float = 1,
     poweralt = 0.0030768 powerinc = 0.9969232 powernull =  0
     type I error summaries:
     at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374
-    
+    sgpower(poweralt=0.0030768, powerinc=0.9969232, powernull=0,
+            typeI=typeI(at0=0.0030768, min=0.0030768, max=0.0250375, mean=0.0094374))
+
     #Plot the power curve
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
@@ -69,8 +95,9 @@ def sgpower(*, true: float, null_lo, null_hi, std_err: float = 1,
     >>> fig, ax = plt.subplots()
     >>> power = []
     >>> for i in range(len(theta)):
-    ...     power.append( sgpower(true=theta[i], null_lo=-1, null_hi=1, std_err=se,
-    ...                interval_type='confidence', interval_level=0.05).poweralt)
+    ...     power.append(sgpower(true=theta[i], null_lo=-1, null_hi=1, std_err=se,
+    ...                interval_type='confidence', interval_level=0.05, 
+                        no_print=True).poweralt)
     >>> ax.plot(theta, power)
     >>> ax.set_xlabel('theta')
     >>> ax.set_ylabel('power')
@@ -80,8 +107,9 @@ def sgpower(*, true: float, null_lo, null_hi, std_err: float = 1,
     from scipy.stats import norm
     from collections import namedtuple  # for better naming of the output
     # Need to learn error handling
+    # TODO: Add more checks to make sure that only scalars are used as input
     if interval_type not in ['confidence', 'likelihood']:
-        raise ValueError("Parameter 'interval_type' must be one of the following:\
+        raise ValueError("'interval_type' must be one of the following:\
              \n   'confidence'  or  'likelihood'")
 
     if interval_type == 'confidence':
@@ -111,50 +139,32 @@ def sgpower(*, true: float, null_lo, null_hi, std_err: float = 1,
     if (null_hi-null_lo) > 2*Z*std_err:
         powerinc = 1 - (norm.cdf(null_lo/std_err - true/std_err - Z)
                         + norm.cdf(-null_hi/std_err + true/std_err - Z))-(
-                        norm.cdf(null_hi/std_err - true/std_err - Z) - norm.cdf(
-                            null_lo/std_err - true/std_err + Z))
+                    norm.cdf(null_hi/std_err - true/std_err - Z) - norm.cdf(
+                        null_lo/std_err - true/std_err + Z))
 
     # check -> works only for scalar input
-    # Need to find out which exception to raise to emulate behaviour of R's warning()-function
-    # Need to find out how to the index
+    # Need to find out how to get the index
     if round(power0 + powerinc + power1, 2) != 1:
         print('error: power0+powerinc+power1 != 1 for indices ',
               round(power0 + powerinc + power1, 2) != 1)
     # bonus: type I error summaries
-    pow0 = lambda x: norm.cdf(null_lo/std_err - x/std_err - Z) + norm.cdf(
+    def pow0(x): return norm.cdf(null_lo/std_err - x/std_err - Z) + norm.cdf(
         -null_hi/std_err + x/std_err - Z)
     minI = pow0((null_lo + null_hi)/2)
     maxI = pow0(null_lo)
     avgI = 1/(null_hi - null_lo)*integrate.quad(pow0, null_lo, null_hi)[0]
     typeI = (minI, maxI, avgI)
     if null_lo <= 0 & 0 <= null_hi:
-        # Not quite the output I want
-        # typeI = ('at 0 =', round(pow0(0),7), 'min =', round(minI,7), 'max =',round(maxI,7), 'mean =', round(avgI,7))
         TypeI = namedtuple('typeI', 'at0, min, max, mean')
-        typeI = TypeI(round(pow0(0), 7), round(minI, 7), round(maxI, 7), round(avgI, 7))
+        typeI = TypeI(round(pow0(0), 7), round(minI, 7),
+                      round(maxI, 7), round(avgI, 7))
     # more bonus: P(inc | null) (basically analogous to type II error but for confirmation)
     # (TBD)
     # Displaying of bonus statistics not correct yet
-    print('poweralt =', round(power0, 7), 'powerinc =', round(powerinc, 7),
-          'powernull = ', round(power1, 7), '\n type I error summaries: \n',
-          'at 0 =', round(pow0(0), 7), 'min =', round(minI, 7),
-          'max =', round(maxI, 7), 'mean =', round(avgI, 7))
+    if no_print is False :
+        print('poweralt =', round(power0, 7), 'powerinc =', round(powerinc, 7),
+              'powernull = ', round(power1, 7), '\n type I error summaries: \n',
+              'at 0 =', round(pow0(0), 7), 'min =', round(minI, 7),
+              'max =', round(maxI, 7), 'mean =', round(avgI, 7))
     sgpow = namedtuple('sgpower', ['poweralt', 'powerinc', 'powernull', 'typeI'])
-    res = sgpow(round(power0, 7), round(powerinc, 7), round(power1, 7), typeI)
-    return res
-
-def warning(text: str):
-    """
-    Emulate the behavior of the R-function with the same name
-
-    Parameters
-    ----------
-    text : str
-        DESCRIPTION.
-
-    Returns
-    -------
-    None.
-    """
-    from termcolor import colored
-    print(colored(text, 'red'))
+    return sgpow(round(power0, 7), round(powerinc, 7), round(power1, 7), typeI)
