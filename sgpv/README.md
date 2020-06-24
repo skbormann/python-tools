@@ -85,7 +85,6 @@ at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374
 
 ## Plotting of SGPVs with example dataset:
 ```python
->>> import pandas as pd
 >>> from sgpv import sgpv
 >>> from sgpv import data
 >>> import matplotlib.pyplot as plt
