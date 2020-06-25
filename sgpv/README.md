@@ -15,17 +15,8 @@ This module contains the following functions:
 # Dependencies
 
 This module depends on: 
-
-            pandas>=1.0.4
-
-            matplotlib>=3.2.1
-
-            numpy>=1.18.0
-
-            scipy>=1.3.2
+ pandas>=1.0.4, matplotlib>=3.2.1, numpy>=1.18.0, scipy>=1.3.2
             
-
-
 These dependencies document only under which version I tested my functions.
 Older version might work as well. 
 
@@ -55,7 +46,7 @@ Below are some examples taken from the documentation of each function:
      deltagap=array([None, 1.7527413, None], dtype=object))
 ```
 
-## Power function(sgpv.power) 
+## Power function (sgpv.power): 
 ```python
 >>> from sgpv import sgpv       
 >>> sgpv.power(true=2, null_lo=-1, null_hi=1, std_err = 1,
@@ -70,7 +61,7 @@ type I error summaries:
 at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374 
 ```
 
-## False discory risk(sgpv.risk)   
+## False discory risk (sgpv.risk):   
 ```python           
 >>> from sgpv import sgpv
 >>> import numpy as np
@@ -83,7 +74,7 @@ at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374
 0.0594986
 ```
 
-## Plotting of SGPVs with example dataset:
+## Plotting of SGPVs with example dataset (sgpv.plot):
 ```python
 >>> from sgpv import sgpv
 >>> from sgpv import data
