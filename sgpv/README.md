@@ -107,6 +107,7 @@ at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374
     ## risk-function    
     * Fixed inconsistencies/mistakes in the documentation for the risk-function.
     * Renamed the returned value of the risk-function from 'res' to 'fdcr' to reflect better the content of the variable.
+    * Added a better formated output, similar to the output of the Stata version of this function.
     ## plot-function
     * Added some more input checks and added a better description of the allowed input for the option "set_order".
 * Version 1.0.1 25.06.2020: Fixed incorrect imports in examples and modified code for importing the example dataset based on code found in statsmodels.datasets.utils.

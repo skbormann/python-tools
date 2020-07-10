@@ -578,8 +578,8 @@ def risk(
                alt_space = (2 + 1*norm.ppf(1-0.05/2)*0.8,
                             2 - 1*norm.ppf(1-0.05/2)*0.8),
                interval_type = 'confidence',
-               interval_level = 0.05)
-    0.0594986
+               interval_level = 0.05);
+    The false discovery risk is: 0.0594986
 
     False discovery risk with 1/8 likelihood support level
 
@@ -590,7 +590,7 @@ def risk(
                alt_space = (2 + 1*norm.ppf(1-0.041/2)*0.8,
                             2 - 1*norm.ppf(1-0.041/2)*0.8),
                interval_type = 'likelihood',
-               interval_level = 1/8)
+               interval_level = 1/8);
     0.0505552
 
    With truncated normal weighting distribution
@@ -602,8 +602,8 @@ def risk(
                alt_space = (2 + 1*norm.ppf(1-0.041/2)*0.8,
                             2 - 1*norm.ppf(1-0.041/2)*0.8),
                interval_type = 'likelihood',
-               interval_level = 1/8)
-    0.0490258
+               interval_level = 1/8);
+    The false discovery risk is: 0.0490258
 
     False discovery risk with likelihood support intervall and wider null hypothesis
 
@@ -614,8 +614,8 @@ def risk(
                alt_space = (2.5 + 1*norm.ppf(1-0.041/2)*0.8,
                             2.5 - 1*norm.ppf(1-0.041/2)*0.8),
                interval_type = 'likelihood',
-               interval_level = 1/8)
-    0.0168835
+               interval_level = 1/8);
+    The false discovery risk is: 0.0168835
 
     False confirmation risk example
 
@@ -627,8 +627,8 @@ def risk(
                alt_weights = 'Uniform',
                alt_space = (np.log(1.5), 1.25*np.log(1.5)),
                interval_type = 'likelihood',
-               interval_level = 1/8)
-    0.0305952
+               interval_level = 1/8);
+    The false confirmatory risk is: 0.0305952
     """
     import numpy as np
     from scipy import integrate
@@ -810,9 +810,11 @@ def risk(
 
     if fdr is not None:
         fdcr = round(fdr, 7)
+        print('The false discovery risk (fdr) is:', fdcr)
 
     elif fcr is not None:
         fdcr = round(fcr, 7)
+        print('The false confirmatory risk (fdr) is:', fdcr)
 
     return fdcr
 
