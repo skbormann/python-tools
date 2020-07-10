@@ -97,7 +97,7 @@ at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374
 ```
 
 # Release history
-* Version 1.0.2 10.07.2020:
+* Version 1.0.3 10.07.2020:
     ## General changes 
     * Reformatted the code with autopep8 and flake8. 
     * Renamed some variables to confirm more with Python conventions. 
