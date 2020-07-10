@@ -5,14 +5,15 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="sgpv",
-    version="1.0.post3",
+    version="1.0.2",
     author="Sven-Kristjan Bormann",
     author_email="sven-kristjan@gmx.de",
     description="Tools to calculate SGPVs",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/skbormann/python-tools/sgpv",
-    keywords='"second generation p-values" sgpv "false discovery risk" power-function',
+    keywords='"second generation p-values" sgpv "false discovery risk" \
+        "false confirmatory risk" power-function',
     packages=setuptools.find_packages(),
     include_package_data=True,
     classifiers=[

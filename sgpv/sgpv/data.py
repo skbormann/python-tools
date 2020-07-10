@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Example data set for the sgpv-module.
 
 This is the same dataset that is used in the R-library of the same name.
@@ -17,12 +16,14 @@ References:
 
  Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018).
  Second-generation p-values: Improved rigor, reproducibility, & transparency
- in statistical analyses. PLoS ONE 13(3): e0188299. https://doi.org/10.1371/journal.pone.0188299
+ in statistical analyses. PLoS ONE 13(3): e0188299.
+ https://doi.org/10.1371/journal.pone.0188299
 
  Source: https://github.com/ramhiser/datamicroarray/wiki/Golub-(1999)
 """
 # Copied code from statsmodels.datasets.utils to add allow import of dataset from
 # module directory
+
 
 def load():
     """Load the example.

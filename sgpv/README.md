@@ -55,7 +55,7 @@ Below are some examples taken from the documentation of each function:
      deltagap=array([None, 1.7527413, None], dtype=object))
 ```
 
-## Power function(sgpv.power) 
+## Power function (sgpv.power): 
 ```python
 >>> from sgpv import sgpv       
 >>> sgpv.power(true=2, null_lo=-1, null_hi=1, std_err = 1,
@@ -70,7 +70,7 @@ type I error summaries:
 at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374 
 ```
 
-## False discory risk(sgpv.risk)   
+## False discory risk (sgpv.risk):   
 ```python           
 >>> from sgpv import sgpv
 >>> import numpy as np
@@ -83,10 +83,9 @@ at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374
 0.0594986
 ```
 
-## Plotting of SGPVs with example dataset:
+## Plotting of SGPVs with example dataset (sgpv.plot):
 ```python
->>> from sgpv import sgpv
->>> from sgpv import data
+>>> from sgpv import sgpv, data
 >>> import matplotlib.pyplot as plt
 >>> df = data.load_dataset()  # Load the example dataset as a dataframe
 >>> est_lo=df['ci.lo']
@@ -107,9 +106,21 @@ at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374
 ```
 
 # Release history
-
+* Version 1.0.2 10.07.2020:
+    ## General changes 
+    * Reformatted the code with autopep8 and flake8. 
+    * Renamed some variables to confirm more with Python conventions. 
+    * Added more descriptions based on the R-code to the documentation.  
+    ## power-function
+    * Fixed the display of the bonus statistic 'at 0':  Now this value is only displayed in the correct situation; the description for this value was added to the documentation.  
+    ## risk-function    
+    * Fixed inconsistencies/mistakes in the documentation for the risk-function.
+    * Renamed the returned value of the risk-function from 'res' to 'fdcr' to reflect better the content of the variable.
+    ## plot-function
+    * Added some more input checks and added a better description of the allowed input for the option "set_order".
+* Version 1.0.1 25.06.2020: Fixed incorrect imports in examples and modified code for importing the example dataset based on code found in statsmodels.datasets.utils.
 * Version 1.0.0 24.06.2020: Initial release
-* Version 1.0.1 25.06.2020: Fixed incorrect imports in examples and modified code for importing the example dataset based on code found in statsmodels.datasets.utils. 
+ 
 
 
  
