@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Example data set for the sgpv-module.
+"""Example data set for the sgpv-module.
 
 This is the same dataset that is used in the R-library of the same name.
 Test Statistics from Gloub (1999) Leukemia data set.
@@ -26,14 +25,12 @@ References:
 # module directory
 
 def load():
-    """
-    Load the example
+    """Load the example.
 
     Returns
     -------
     df : pandas_series
         A dataframe containing the dataset.
-
     """
     df = load_csv(__file__, 'leukstats.csv', index_col=0, convert_float=True)
     return df
