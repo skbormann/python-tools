@@ -70,8 +70,8 @@ at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374
            std_err = 0.8, null_weights = 'Uniform',
            null_space = (np.log(1/1.1), np.log(1.1)), alt_weights = 'Uniform',
            alt_space = (2 + 1*norm.ppf(1-0.05/2)*0.8, 2 - 1*norm.ppf(1-0.05/2)*0.8),
-           interval_type = 'confidence', interval_level = 0.05)
-0.0594986
+           interval_type = 'confidence', interval_level = 0.05);
+The false discovery risk is: 0.0594986
 ```
 
 ## Plotting of SGPVs with example dataset (sgpv.plot):
