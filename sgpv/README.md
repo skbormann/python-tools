@@ -1,7 +1,8 @@
 # sgpv module
 
-This module allows to calculate Second Generation P-Values and their diagnostics in Python.
-This package is a translation of the original  [sgpv R-library](https://github.com/weltybiostat/sgpv) into Python.
+This module allows to calculate Second Generation P-Values developed by Blume et.al.(2018,2019) 
+and their associated diagnostics in Python.
+This package is a translation of the original [sgpv R-library](https://github.com/weltybiostat/sgpv) into Python.
 The same library has already been translated into [Stata](https://github.com/skbormann/stata-tools/sgpv) by the author of this Python translation.
 
 This module contains the following functions:
@@ -11,6 +12,9 @@ This module contains the following functions:
             risk     - false confirmation/discovery risks for the SGPVs
             plot     - plot the SGPVs
             data     - load the example dataset into memory
+
+The module comes with an example dataset (leukstats.csv) to showcase the plotting function.
+See the documentation in the file data.py for more information about this dataset.
 
 # Dependencies
 
@@ -76,7 +80,8 @@ The false discovery risk is: 0.0594986
 
 ## Plotting of SGPVs with example dataset (sgpv.plot):
 ```python
->>> from sgpv import sgpv, data
+>>> from sgpv import sgpv
+>>> from sgpv import data
 >>> import matplotlib.pyplot as plt
 >>> df = data.load_dataset()  # Load the example dataset as a dataframe
 >>> est_lo=df['ci.lo']
@@ -114,5 +119,13 @@ The false discovery risk is: 0.0594986
 * Version 1.0.0 24.06.2020: Initial release
  
 
+# References
+Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018).
+Second-generation p-values: Improved rigor, reproducibility, & transparency in
+statistical analyses. PLoS ONE 13(3): e0188299.
+[https://doi.org/10.1371/journal.pone.0188299](https://doi.org/10.1371/journal.pone.0188299)
 
+Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction
+to Second-generation p-values. The American Statistician. In press.
+[https://doi.org/10.1080/00031305.2018.1537893](https://doi.org/10.1080/00031305.2018.1537893)
  

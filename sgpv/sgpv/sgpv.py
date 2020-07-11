@@ -141,11 +141,11 @@ def value(*, null_lo, null_hi, est_lo, est_hi, inf_correction: float = 1e-5,
     ...          null_lo=np.log(1/1.5), null_hi=np.log(1.5))
     sgpv(pdelta=array([0.]), deltagap=array([0.65691], dtype=object))
     """
-
-    import numpy as np
     from collections import namedtuple
 
-    # Convert inputs into np.array to emulate R behaviour
+    import numpy as np
+
+    # Convert inputs into np.array to emulate R behaviour.
     null_lo = np.asarray(null_lo, dtype=np.float64)
     null_hi = np.asarray(null_hi, dtype=np.float64)
     est_lo = np.asarray(est_lo, dtype=np.float64)
@@ -165,7 +165,7 @@ def value(*, null_lo, null_hi, est_lo, est_hi, inf_correction: float = 1e-5,
         null_lo = np.repeat(null_lo, est_lo.size)
         null_hi = np.repeat(null_hi, est_hi.size)
 
-    # Compute Interval Lengths
+    # Compute interval lengths.
     est_len = np.array(est_hi) - np.array(est_lo)
     null_len = np.array(null_hi) - np.array(null_lo)
 
@@ -370,10 +370,11 @@ def power(*, true: float, null_lo, null_hi, std_err: float = 1,
     >>> ax.set_ylabel('power')
     >>> plt.show()
     """
+    from collections import namedtuple
+
     import numpy as np
     from scipy import integrate
     from scipy.stats import norm
-    from collections import namedtuple
 
     # Input checks
     if interval_type not in ['confidence', 'likelihood']:
@@ -890,7 +891,8 @@ def plot(*, est_lo, est_hi, null_lo, null_hi,
     Example
     -------
 
-    >>> from sgpv import sgpv, data
+    >>> from sgpv import sgpv
+    >>> from sgpv import data
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> df = data.load()  # Load the example dataset as a dataframe

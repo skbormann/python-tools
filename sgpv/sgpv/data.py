@@ -1,6 +1,11 @@
-"""Example data set for the sgpv-module.
+"""Example dataset for the sgpv-module.
 
 This is the same dataset that is used in the R-library of the same name.
+
+Description
+-----------
+
+
 Test Statistics from Gloub (1999) Leukemia data set.
 
 Data are from 7218 gene specific t-tests for a difference in mean expression
@@ -11,7 +16,9 @@ t-statistic (t.stat), p-value (p.value), CI lower limit (ci.lo),
 CI upper limit (ci.hi), estimate (estimate), standard error (se).
 
 
-References:
+References
+----------
+
  Gloub (1999) and used in Blume et. al. (2018) PlosONE.
 
  Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018).
@@ -21,7 +28,7 @@ References:
 
  Source: https://github.com/ramhiser/datamicroarray/wiki/Golub-(1999)
 """
-# Copied code from statsmodels.datasets.utils to add allow import of dataset from
+# Copied code from statsmodels.datasets.utils to allow easy import of dataset from
 # module directory
 
 
