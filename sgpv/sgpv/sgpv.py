@@ -54,7 +54,7 @@ def value(*, null_lo, null_hi, est_lo, est_hi, inf_correction: float = 1e-5,
         A small number to denote a positive but infinitesimally small SGPV.
         Default is 1e-5. SGPVs that are infinitesimally close to 1
         are assigned 1-infcorrection.
-        This option can only be invoked when one of the intervals
+        This option has an effect only if one of the intervals
         has infinite length.
     warnings : bool, optional
         Warnings toggle. Showing the warnings about potentially
@@ -305,20 +305,21 @@ def power(*, true: float, null_lo, null_hi, std_err: float = 1,
     -------
     sgpow : tuple
         A list containing the following components:
+
         poweralt:
             Probability of SGPV = 0 calculated assuming the parameter
-                  is equal to true. That is, poweralt = P(SGPV = 0 | θ = true).
+            is equal to true. That is, poweralt = P(SGPV = 0 | θ = true).
         powerinc:
             Probability of 0 < SGPV < 1 calculated assuming the parameter
-                  is equal to true. That is, poweralt = P(0 < SGPV < 1 | θ = true).
+            is equal to true. That is, poweralt = P(0 < SGPV < 1 | θ = true).
         powernull:
             Probability of SGPV = 1 calculated assuming the parameter
-                  is equal to true. That is, poweralt = P(SGPV = 1 | θ = true).
+            is equal to true. That is, poweralt = P(SGPV = 1 | θ = true).
 
         type I error summaries:
-                                Named vector that includes different ways
-                                the type I error may be summarized for an
-                                interval null hypothesis.
+            Named vector that includes different ways the type I error may be
+            summarized for an interval null hypothesis.
+
                     min:
                         min is the minimum type I error over the range
                         (null_lo, null_hi), which occurs at the midpoint of
@@ -332,7 +333,7 @@ def power(*, true: float, null_lo, null_hi, std_err: float = 1,
                         the range (null_lo, null_hi).
 
                         If 0 is included in the null hypothesis region,
-                        then `type I error summaries` also contains 'at 0'
+                        then `type I error summaries` also contains 'at 0'.
                     pow0:
                         is the type I error calculated assuming the true parameter
                         value θ is equal to 0.
@@ -483,6 +484,7 @@ def risk(
     "empirical bayes FDR") for a second-generation p-value of 0, or
     the false confirmation risk for a second-generation p-value of 1.
 
+
     Parameters
     ----------
     sgpval : int, optional
@@ -532,17 +534,19 @@ def risk(
     When possible, one should compute the second-generation p-value and
     FDR/FCR on a scale that is symmetric about the null hypothesis.
     For example, if the parameter of interest is an odds ratio,
-    inputs std_err, null_lo, null_hi, null_space, and alt_space are
-    typically on the log scale.
+    inputs **std_err**, **null_lo**, **null_hi**, **null_space**, and
+    **alt_space** are typically on the log scale.
 
-    If TruncNormal is used for null_weights,
+    If 'TruncNormal' is used for **null_weights**,
     then the distribution used is a truncated Normal distribution with
-    mean equal to the midpoint of null_space, and standard deviation equal to
-    std_err, truncated to the support of null_space.
-    If TruncNormal is used for alt_weights,
+    mean equal to the midpoint of *null_space*, and standard deviation equal to
+    **std_err**, truncated to the support of **null_space**.
+
+    If 'TruncNormal' is used for **alt_weights**,
     then the distribution used is a truncated Normal distribution with
     mean equal to the midpoint of alt_space, and standard deviation equal to
-    std_err, truncated to the support of alt.space.
+    **std_err**, truncated to the support of **alt_space**.
+
     Further customization of these parameters for the truncated Normal are
     not possible.
 
@@ -556,15 +560,17 @@ def risk(
     Returns
     -------
     fdcr: float
-        Numeric scalar representing the False discovery risk (FDR) or
+        A scalar representing the False discovery risk (FDR) or
         false confirmation risk (FCR) for the observed second-generation p-value.
 
         If sgpval = 0, the function returns false discovery risk (FDR).
+
         If sgpval = 1, the function returns false confirmation risk (FCR).
 
 
     Examples
     --------
+
     >>> from sgpv import sgpv
     >>> import numpy as np
     >>> from scipy.stats import norm
@@ -580,7 +586,8 @@ def risk(
                             2 - 1*norm.ppf(1-0.05/2)*0.8),
                interval_type = 'confidence',
                interval_level = 0.05);
-    The false discovery risk is: 0.0594986
+    The false discovery risk (fdr) is: 0.0594986
+
 
     False discovery risk with 1/8 likelihood support level
 
@@ -592,9 +599,22 @@ def risk(
                             2 - 1*norm.ppf(1-0.041/2)*0.8),
                interval_type = 'likelihood',
                interval_level = 1/8);
-    0.0505552
+    The false discovery risk (fdr) is: 0.0505552
 
-   With truncated normal weighting distribution
+
+    False discovery risk with 1/8 likelihood support level
+
+    >>> sgpv.risk(sgpval = 0,  null_lo = np.log(1/1.1),
+                  null_hi = np.log(1.1), std_err = 0.8,
+                  null_weights = 'Point',  null_space = 0,
+               alt_weights = 'Uniform',
+               alt_space = (2 + 1*norm.ppf(1-0.041/2)*0.8,
+                            2 - 1*norm.ppf(1-0.041/2)*0.8),
+               interval_type = 'likelihood',
+               interval_level = 1/8);
+    The false discovery risk (fdr) is: 0.0505552
+
+    With truncated normal weighting distribution
 
     >>> sgpv.risk(sgpval = 0,  null_lo = np.log(1/1.1),
                   null_hi = np.log(1.1), std_err = 0.8,
@@ -604,7 +624,7 @@ def risk(
                             2 - 1*norm.ppf(1-0.041/2)*0.8),
                interval_type = 'likelihood',
                interval_level = 1/8);
-    The false discovery risk is: 0.0490258
+    The false discovery risk (fdr) is: 0.0490258
 
     False discovery risk with likelihood support intervall and wider null hypothesis
 
@@ -616,7 +636,7 @@ def risk(
                             2.5 - 1*norm.ppf(1-0.041/2)*0.8),
                interval_type = 'likelihood',
                interval_level = 1/8);
-    The false discovery risk is: 0.0168835
+    The false discovery risk (fdr) is: 0.0168835
 
     False confirmation risk example
 
@@ -629,12 +649,12 @@ def risk(
                alt_space = (np.log(1.5), 1.25*np.log(1.5)),
                interval_type = 'likelihood',
                interval_level = 1/8);
-    The false confirmatory risk is: 0.0305952
+    The false confirmatory risk (fcr) is: 0.0305952
     """
     import numpy as np
     from scipy import integrate
     from scipy.stats import norm
-    from sgpv import sgpv
+   # from sgpv import sgpv
 
     # Convert inputs into arrays for easier handling
     null_space = np.asarray(null_space, dtype=np.float64)
@@ -671,7 +691,7 @@ def risk(
     p_sgpv_h1 = None   # `p_sgpv_h1` = P(SGPV=1 | H1 )
 
     if sgpval == 0:
-        def power(x): return sgpv.power(
+        def power_x(x): return power(  # Renamed from the original name 'power' to avoid conflicts with the same named function of this module. 
             true=x,
             null_lo=null_lo,
             null_hi=null_hi,
@@ -680,7 +700,7 @@ def risk(
             interval_level=interval_level,
             no_print=True).poweralt
     if sgpval == 1:
-        def power(x): return sgpv.power(
+        def power_x(x): return power(
             true=x,
             null_lo=null_lo,
             null_hi=null_hi,
@@ -694,7 +714,7 @@ def risk(
                 'For a point indifference zone, specification of a different\
                 null_space not permitted; null_space set to be ',
                 round(null_lo, 2), '.')
-        p_sgpv_h0 = power(x=null_lo)
+        p_sgpv_h0 = power_x(x=null_lo)
     # interval null
     if null_lo != null_hi:
         # P_sgpv_H0 @ point (=type I error at null_space)
@@ -702,7 +722,7 @@ def risk(
             if null_space.size != 1:
                 raise ValueError('Null space must be a vector of len 1 when\
                         using a point null probability distribution.')
-            p_sgpv_h0 = power(x=null_space)
+            p_sgpv_h0 = power_x(x=null_space)
 
         # p_sgpv_h0 averaged: check 'null_space' input
         if null_weights in ['Uniform', 'TruncNormal']:
@@ -724,7 +744,7 @@ def risk(
         # p_sgpv_h0 averaged uniformly
         if null_weights == 'Uniform':
             p_sgpv_h0 = 1 / (max(null_space) - min(null_space)) * integrate.quad(
-                power, min(null_space), max(null_space))[0]
+                power_x, min(null_space), max(null_space))[0]
 
         # p_sgpv_h0 averaged using truncated normal as weighting distribution
         # function
@@ -735,7 +755,7 @@ def risk(
             # estimator
             truncNorm_sd = std_err
 
-            def integrand(x): return power(x) * (norm.pdf(x,
+            def integrand(x): return power_x(x) * (norm.pdf(x,
                                                           truncNorm_mu,
                                                           truncNorm_sd) * (norm.cdf(max(null_space),
                                                                                     truncNorm_mu,
@@ -757,7 +777,7 @@ def risk(
                 'alternative space must be outside of \
                 the originally specified indifference zone')
 
-        p_sgpv_h1 = power(x=alt_space)
+        p_sgpv_h1 = power_x(x=alt_space)
 
     # p_sgpv_h1 averaged: check 'alt_space' input
     if alt_weights in ['Uniform', 'TruncNormal']:
@@ -778,7 +798,7 @@ def risk(
     # p_sgpv_h1 averaged uniformly
     if alt_weights == 'Uniform':
         p_sgpv_h1 = 1 / (max(alt_space) - min(alt_space)) * integrate.quad(
-            power, min(alt_space), max(alt_space))[0]
+            power_x, min(alt_space), max(alt_space))[0]
 
     # p_sgpv_h1 averaged using truncated normal as weighting
     # distribution function
@@ -792,7 +812,7 @@ def risk(
             raise ValueError('trunNorm_mu` and `truncNorm_sd must be numeric;\
                              may not be None.')
 
-        def integrand(x): return power(x) * (norm.pdf(x,
+        def integrand(x): return power_x(x) * (norm.pdf(x,
                                                       truncNorm_mu,
                                                       truncNorm_sd) * (norm.cdf(max(alt_space),
                                                                                 truncNorm_mu,
@@ -815,13 +835,13 @@ def risk(
 
     elif fcr is not None:
         fdcr = round(fcr, 7)
-        print('The false confirmatory risk (fdr) is:', fdcr)
+        print('The false confirmatory risk (fcr) is:', fdcr)
 
     return fdcr
 
 
-def plot(*, est_lo, est_hi, null_lo, null_hi,
-         set_order='sgpv', x_show=None, null_col=(0.815, 0.847, 0.909, 1),
+def plot(*, est_lo, est_hi, null_lo, null_hi, set_order='sgpv',
+         x_show=None, null_col=(0.815, 0.847, 0.909, 1),
          int_col=('cornflowerblue', 'darkslateblue', 'firebrick'),
          plot_axis=True, null_pt=None, outline_zone=True,
          title_lab="Title", x_lab="Position (by set_order)",
@@ -848,11 +868,13 @@ def plot(*, est_lo, est_hi, null_lo, null_hi,
         Value must be finite.
     set_order : str or pandas.Series , optional
          A numeric vector/data series giving the desired order along the x-axis.
+
          If set_order is set to 'sgpv',
-             the second-generation p-value ranking is used.
-         If set_order is set to None,
-             the original input ordering is used.
-         If set_order is a pandas.
+         the second-generation p-value ranking is used.
+
+         If set_order is set to **None**,
+         the original input ordering is used.
+
          Default is 'sgpv'.
     x_show : int, optional
          A scalar representing the maximum ranking on the x-axis that
@@ -866,7 +888,7 @@ def plot(*, est_lo, est_hi, null_lo, null_hi,
         of 1, between 0 and 1, and 0 respectively.
         Provide a list of three colors to replace the default colors.
     plot_axis : bool, optional
-        Toggle for default axis plotting. The default is True.
+        Toggle for axis plotting. The default is True.
     null_pt : float, optional
         A scalar representing a point null hypothesis. If set,
         the function will draw a horizontal dashed black line at this location.
@@ -918,14 +940,14 @@ def plot(*, est_lo, est_hi, null_lo, null_hi,
     ----
     Some options and details of the R-code were not implemented because
     they do not exist in matplotlib or are difficult to create for only small gains.
-   """
+    """
 
     import numpy as np
     import pandas as pd
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
     from matplotlib import collections as mc
-    # import sgpv
+
     # Convert inputs
     # Create dataframe to make sorting and using x_show option easier
     data = pd.DataFrame({'est_lo': est_lo, 'est_hi': est_hi,

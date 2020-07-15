@@ -75,7 +75,7 @@ at 0 = 0.0030768 min = 0.0030768 max = 0.0250375 mean = 0.0094374
            null_space = (np.log(1/1.1), np.log(1.1)), alt_weights = 'Uniform',
            alt_space = (2 + 1*norm.ppf(1-0.05/2)*0.8, 2 - 1*norm.ppf(1-0.05/2)*0.8),
            interval_type = 'confidence', interval_level = 0.05);
-The false discovery risk is: 0.0594986
+The false discovery risk (fdr) is: 0.0594986
 ```
 
 ## Plotting of SGPVs with example dataset (sgpv.plot):
@@ -102,6 +102,10 @@ The false discovery risk is: 0.0594986
 ```
 
 # Release history
+* Version 1.0.3.post1: 15.07.2020:
+    * Fixed a couple of formatting issues in the docstrings.
+    * Cleaned the documentation of 'set_order' option of the plot function.
+    * Renamed the implicit function 'power' to 'power_x' to avoid a problematic import for the risk-function. (No functional change)
 * Version 1.0.3 10.07.2020:
     ## General changes 
     * Reformatted the code with autopep8 and flake8. 

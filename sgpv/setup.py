@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="sgpv",
-    version="1.0.3",
+    version="1.0.3.post1",
     author="Sven-Kristjan Bormann",
     author_email="sven-kristjan@gmx.de",
     description="Tools to calculate SGPVs",
